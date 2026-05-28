@@ -1,0 +1,64 @@
+##   ASP.NET Core / .NET Stable Generic Gitignore   ##
+######################################################
+
+# Combined build outputs and artifacts
+[Dd]ebug/
+[Dd]ebugPS/
+[Rr]elease/
+[Rr]eleasePS/
+x64/
+x86/
+[Aa]rm/
+[Aa]rm64/
+bsearch/
+bin/
+obj/
+
+# Visual Studio cache, tracking, and runtime files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider / IntelliJ WebStorm / JetBrains IDEs
+.idea/
+*.sln.iml
+
+# Visual Studio Code workspace settings
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/code-snippets
+
+# Local user secrets configurations for ASP.NET Core
+# (Never commit actual database connection strings or production API keys!)
+secrets.json
+[App_Data]/
+appsettings.Development.json
+
+# Tooling, diagnostic logs, and crash dumps
+*.log
+*.log.*
+*.dump
+*.dmp
+.diagnostic/
+
+# NuGet Package Manager folders
+# (Packages are automatically restored by the compiler via .csproj)
+*.nuget.props
+*.nuget.targets
+pkgs/
+packages/
+
+# Entity Framework Core migrations & bundle caches
+*.exe
+*.dll
+*.pdb
+*.efbundle
+
+# OS-specific hidden file clutter
+.DS_Store
+Thumbs.db

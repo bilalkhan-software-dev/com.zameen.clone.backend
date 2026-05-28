@@ -1,0 +1,6 @@
+@com.zameen_HostAddress = http://localhost:5118
+
+GET {{com.zameen_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
