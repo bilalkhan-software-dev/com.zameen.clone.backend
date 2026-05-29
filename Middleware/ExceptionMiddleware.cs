@@ -3,16 +3,11 @@ using com.zameen.Exceptions;
 
 namespace com.zameen.Middleware
 {
-    public class ExceptionMiddleware
+    /// Using Primary Constructor
+    public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
     {
-        private readonly RequestDelegate _next;
-        private readonly ILogger<ExceptionMiddleware> _logger;
-
-        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
-        {
-            _next = next;
-            _logger = logger;
-        }
+        private readonly RequestDelegate _next = next;
+        private readonly ILogger<ExceptionMiddleware> _logger = logger;
 
         public async Task InvokeAsync(HttpContext context)
         {
@@ -40,7 +35,7 @@ namespace com.zameen.Middleware
 
             object response;
 
-            if (appEx is ValidationException validationEx)
+            if (appEx is AppValidationException validationEx)
             {
                 // For validation errors, include the list of errors
                 response = ApiResponse<object>.Fail(appEx.Message, validationEx.Errors);

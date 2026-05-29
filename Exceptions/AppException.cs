@@ -1,15 +1,9 @@
 namespace com.zameen.Exceptions
 {
-    public abstract class AppException : Exception
+    public abstract class AppException(string message, string errorCode, int httpStatusCode)
+        : Exception(message)
     {
-        public string ErrorCode { get; }
-        public int HttpStatusCode { get; }
-
-        protected AppException(string message, string errorCode, int httpStatusCode)
-            : base(message)
-        {
-            ErrorCode = errorCode;
-            HttpStatusCode = httpStatusCode;
-        }
+        public string ErrorCode { get; } = errorCode;
+        public int HttpStatusCode { get; } = httpStatusCode;
     }
 }
