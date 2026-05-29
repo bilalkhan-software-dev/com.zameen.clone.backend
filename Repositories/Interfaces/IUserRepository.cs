@@ -2,8 +2,5 @@
 
 namespace com.zameen.Repositories.Interfaces
 {
-    public interface IUserRepository : IGenericRepository<ApplicationUser, Guid>
-    {
-
-    }
+    public interface IUserRepository : IGenericRepository<ApplicationUser, Guid> { }
 }

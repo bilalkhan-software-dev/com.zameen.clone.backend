@@ -4,6 +4,9 @@ using com.zameen.Exceptions;
 using com.zameen.Models;
 using com.zameen.Repositories.Implementation;
 using com.zameen.Repositories.Interfaces;
+using com.zameen.Services;
+using com.zameen.Services.Implementation;
+using com.zameen.Services.Interfaces;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -99,22 +102,36 @@ namespace com.zameen.Extensions
             services.AddValidatorsFromAssemblyContaining<Program>();
 
             // Application services
-            // services.AddScoped<IAuthService, AuthService>();
-            // services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IAuthService, AuthService>();
             services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
+            services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+            services.AddScoped<JwtHelper>();
 
             // AutoMapper
             services.AddAutoMapper(typeof(Program));
 
-            // CORS (optional, for development)
+            var frontendUrl = configuration["Frontend:BaseUrl"];
+
+            if (string.IsNullOrEmpty(frontendUrl))
+            {
+                // Fallback block to prevent breaking your build if appsettings is empty
+                frontendUrl = "http://localhost:3000";
+            }
+
             services.AddCors(options =>
             {
                 options.AddPolicy(
-                    "AllowAll",
-                    builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()
+                    "AllowNextJsFrontend",
+                    builder =>
+                    {
+                        builder
+                            .WithOrigins(frontendUrl) // Restricts incoming browser requests
+                            .AllowAnyMethod() // Allows GET, POST, PUT, DELETE, etc.
+                            .AllowAnyHeader() // Allows Authorization, Content-Type headers
+                            .AllowCredentials(); // Crucial if your Next.js app sends HttpOnly Refresh Cookies
+                    }
                 );
             });
-
             // Swagger
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(c =>
@@ -134,22 +151,22 @@ namespace com.zameen.Extensions
                     }
                 );
 
-                c.AddSecurityRequirement(
-                    new OpenApiSecurityRequirement
-                    {
-                        {
-                            new OpenApiSecurityScheme
-                            {
-                                Reference = new OpenApiReference
-                                {
-                                    Type = ReferenceType.SecurityScheme,
-                                    Id = "Bearer",
-                                },
-                            },
-                            Array.Empty<string>()
-                        },
-                    }
-                );
+                // c.AddSecurityRequirement(
+                //     new OpenApiSecurityRequirement
+                //     {
+                //         {
+                //             new OpenApiSecurityScheme
+                //             {
+                //                 Reference = new OpenApiReference
+                //                 {
+                //                     Type = ReferenceType.SecurityScheme,
+                //                     Id = "Bearer",
+                //                 },
+                //             },
+                //             Array.Empty<string>()
+                //         },
+                //     }
+                // );
             });
 
             // Health checks

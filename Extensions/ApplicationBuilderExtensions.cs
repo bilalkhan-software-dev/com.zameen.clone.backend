@@ -25,15 +25,15 @@ namespace com.zameen.Extensions
 
             app.UseHttpsRedirection();
             app.UseRouting();
-            app.UseCors("AllowAll");
+            app.UseCors("AllowNextJsFrontend");
 
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
+            if (app is WebApplication webApp)
             {
-                endpoints.MapControllers();
-                endpoints.MapHealthChecks(
+                webApp.MapControllers();
+                webApp.MapHealthChecks(
                     "/health",
                     new HealthCheckOptions
                     {
@@ -54,8 +54,7 @@ namespace com.zameen.Extensions
                         },
                     }
                 );
-            });
-
+            }
             return app;
         }
     }

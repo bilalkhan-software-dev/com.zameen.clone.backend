@@ -1,8 +1,4 @@
-namespace com.zameen.Exceptions
-{
-    public class ResourceAlreadyExistsException : AppException
-    {
-        public ResourceAlreadyExistsException(string message = "Resource already exists")
-            : base(message, "RESOURCE_ALREADY_EXISTS", StatusCodes.Status409Conflict) { }
-    }
-}
+namespace com.zameen.Exceptions;
+
+public class ResourceAlreadyExistsException(string message = "Resource already exists")
+    : AppException(message, "RESOURCE_ALREADY_EXISTS", StatusCodes.Status409Conflict) { }
