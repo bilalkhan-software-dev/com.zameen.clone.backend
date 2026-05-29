@@ -101,11 +101,15 @@ namespace com.zameen.Extensions
             });
             services.AddValidatorsFromAssemblyContaining<Program>();
 
-            // Application services
-            services.AddScoped<IAuthService, AuthService>();
+            // Application Repositories
             services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-            services.AddScoped<JwtHelper>();
+
+            // Application services
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IUserService, UserService>();
+
+            services.AddScoped<JwtTokenService>();
 
             // AutoMapper
             services.AddAutoMapper(typeof(Program));
