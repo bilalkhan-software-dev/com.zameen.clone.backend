@@ -5,12 +5,9 @@ namespace com.zameen.Models.Dto.Response;
 public class AgentResponse
 {
     public string Id { get; set; } = string.Empty;
-
     public required string UserId { get; set; }
-
     public string AgencyName { get; set; } = string.Empty;
-
+    public string? ProfilePic { get; set; }
     public AccountStatus? AccountStatus { get; set; }
-
     public string? Bio { get; set; }
 }
