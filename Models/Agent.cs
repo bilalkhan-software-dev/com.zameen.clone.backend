@@ -8,7 +8,9 @@ namespace com.zameen.Models
 
         public required string UserId { get; set; }
 
-        public AccountStatus AccountStatus { get; set; }
+        public string ProfilePic { get; set; } = string.Empty;
+
+        public AccountStatus AccountStatus { get; set; } = AccountStatus.PENDING;
 
         public string AgencyName { get; set; } = string.Empty;
 

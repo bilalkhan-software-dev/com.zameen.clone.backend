@@ -1,62 +1,119 @@
 using System.Text.Json;
 using com.zameen.Exceptions;
+using Microsoft.AspNetCore.Mvc;
 
-namespace com.zameen.Middleware
+namespace com.zameen.Middleware;
+
+public sealed class ExceptionMiddleware(
+    RequestDelegate next,
+    ILogger<ExceptionMiddleware> logger,
+    IHostEnvironment environment
+)
 {
-    /// Using Primary Constructor
-    public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
+    private readonly RequestDelegate _next = next;
+    private readonly ILogger<ExceptionMiddleware> _logger = logger;
+    private readonly IHostEnvironment _environment = environment;
+
+    public async Task InvokeAsync(HttpContext context)
     {
-        private readonly RequestDelegate _next = next;
-        private readonly ILogger<ExceptionMiddleware> _logger = logger;
-
-        public async Task InvokeAsync(HttpContext context)
+        try
         {
-            try
-            {
-                await _next(context);
-            }
-            catch (AppException appEx)
-            {
-                _logger.LogWarning(appEx, "Application exception: {ErrorCode}", appEx.ErrorCode);
-                await HandleAppExceptionAsync(context, appEx);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An unhandled exception occurred");
-                await HandleUnhandledExceptionAsync(context);
-            }
+            await _next(context);
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogWarning(
+                "Request was cancelled. | TraceId={TraceId} {Method} {Path}",
+                context.TraceIdentifier,
+                context.Request.Method,
+                context.Request.Path
+            );
+        }
+        catch (AppException ex)
+        {
+            _logger.LogWarning(
+                ex,
+                "Application Exception | TraceId={TraceId} | {Method} {Path} | ErrorCode: {ErrorCode}",
+                context.TraceIdentifier,
+                context.Request.Method,
+                context.Request.Path,
+                ex.ErrorCode
+            );
+
+            await HandleAppExceptionAsync(context, ex);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Unhandled Exception | TraceId={TraceId} | {Method} {Path}",
+                context.TraceIdentifier,
+                context.Request.Method,
+                context.Request.Path
+            );
+
+            _logger.LogError(
+                ex,
+                "Unhandled Exception | TraceId={TraceId} | Path={Path}",
+                context.TraceIdentifier,
+                context.Request.Path
+            );
+            await HandleUnhandledExceptionAsync(context, ex, _environment);
+        }
+    }
+
+    private static async Task HandleAppExceptionAsync(HttpContext context, AppException exception)
+    {
+        if (context.Response.HasStarted)
+            return;
+
+        context.Response.Clear();
+        context.Response.StatusCode = exception.HttpStatusCode;
+        context.Response.ContentType = "application/problem+json";
+
+        var problemDetails = new ProblemDetails
+        {
+            Status = exception.HttpStatusCode,
+            Title = exception.Message,
+            Instance = context.Request.Path,
+        };
+
+        problemDetails.Extensions["traceId"] = context.TraceIdentifier;
+
+        if (exception is AppValidationException validationEx)
+        {
+            problemDetails.Extensions["errors"] = validationEx.Errors;
         }
 
-        // Helper methods to handle exceptions and format responses
-        private static async Task HandleAppExceptionAsync(HttpContext context, AppException appEx)
+        await context.Response.WriteAsync(JsonSerializer.Serialize(problemDetails));
+    }
+
+    private static async Task HandleUnhandledExceptionAsync(
+        HttpContext context,
+        Exception exception,
+        IHostEnvironment environment
+    )
+    {
+        if (context.Response.HasStarted)
+            return;
+
+        context.Response.Clear();
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+
+        context.Response.ContentType = "application/problem+json";
+
+        var problemDetails = new ProblemDetails
         {
-            context.Response.StatusCode = appEx.HttpStatusCode;
-            context.Response.ContentType = "application/json";
+            Status = StatusCodes.Status500InternalServerError,
+            Title = "Internal Server Error",
+            Detail = environment.IsDevelopment()
+                ? exception.ToString()
+                : "An unexpected error occurred.",
+            Instance = context.Request.Path,
+        };
 
-            object response;
+        problemDetails.Extensions["traceId"] = context.TraceIdentifier;
 
-            if (appEx is AppValidationException validationEx)
-            {
-                // For validation errors, include the list of errors
-                response = ApiResponse<object>.Fail(appEx.Message, validationEx.Errors);
-            }
-            else
-            {
-                // All other custom exceptions
-                response = ApiResponse<object>.Fail(appEx.Message);
-            }
-
-            var json = JsonSerializer.Serialize(response);
-            await context.Response.WriteAsync(json);
-        }
-
-        private static async Task HandleUnhandledExceptionAsync(HttpContext context)
-        {
-            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            context.Response.ContentType = "application/json";
-            var response = ApiResponse<object>.Fail("An internal server error occurred.");
-            var json = JsonSerializer.Serialize(response);
-            await context.Response.WriteAsync(json);
-        }
+        await context.Response.WriteAsync(JsonSerializer.Serialize(problemDetails));
     }
 }

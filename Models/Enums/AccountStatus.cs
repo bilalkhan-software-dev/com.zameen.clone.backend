@@ -5,6 +5,6 @@
         BANNED,
         APPROVED,
         PENDING,
-        REJECTED
+        REJECTED,
     }
 }

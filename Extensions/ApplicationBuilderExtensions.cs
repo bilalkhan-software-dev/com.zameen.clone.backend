@@ -11,6 +11,7 @@ namespace com.zameen.Extensions
             IWebHostEnvironment env
         )
         {
+            app.UseMiddleware<CorrelationIdMiddleware>();
             app.UseMiddleware<RequestResponseLoggingMiddleware>();
             app.UseMiddleware<ExceptionMiddleware>();
 

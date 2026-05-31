@@ -6,6 +6,6 @@
         APPROVED,
         REJECTED,
         SOLD,
-        RENTED
+        RENTED,
     }
 }

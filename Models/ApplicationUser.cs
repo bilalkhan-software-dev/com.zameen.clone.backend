@@ -6,7 +6,7 @@ namespace com.zameen.Models
     public class ApplicationUser : IdentityUser<Guid>
     {
         public string FullName { get; set; } = string.Empty;
-        public AccountStatus AccountStatus { get; set; }
+        public AccountStatus AccountStatus { get; set; } = AccountStatus.PENDING;
         public List<RefreshToken> RefreshTokens { get; set; } = [];
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

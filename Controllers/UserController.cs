@@ -7,14 +7,9 @@ namespace com.zameen.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class UserController : ControllerBase
+public class UserController(IUserService userService) : ControllerBase
 {
-    private readonly IUserService _userService;
-
-    public UserController(IUserService userService)
-    {
-        _userService = userService;
-    }
+    private readonly IUserService _userService = userService;
 
     private string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
@@ -30,5 +25,17 @@ public class UserController : ControllerBase
     {
         var result = await _userService.ChangePasswordAsync(GetUserId(), request);
         return result.Success ? Ok(result) : BadRequest(result);
+    }
+
+    [HttpGet("debug")]
+    public IActionResult Debug()
+    {
+        return Ok(
+            new
+            {
+                IsAuth = User.Identity?.IsAuthenticated,
+                Claims = User.Claims.Select(c => new { c.Type, c.Value }),
+            }
+        );
     }
 }

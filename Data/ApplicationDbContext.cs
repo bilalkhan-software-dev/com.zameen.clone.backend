@@ -20,10 +20,13 @@ namespace com.zameen.Data
 
             // Map Property Enums to Strings in the DB
             builder.Entity<Property>().Property(p => p.Status).HasConversion<string>();
-
             builder.Entity<Property>().Property(p => p.PropertyType).HasConversion<string>();
 
-            builder.Entity<Property>().Property(p => p.AreaUnit).HasConversion<string>();
+            builder.Entity<Agent>().Property(a => a.AccountStatus).HasConversion<string>();
+
+            builder.Entity<Property>().Property(p => p.Price).HasPrecision(18, 2);
+
+            builder.Entity<Property>().Property(p => p.AreaSize).HasPrecision(18, 2);
 
             builder
                 .Entity<ApplicationUser>()

@@ -2,13 +2,13 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using com.zameen.Data;
+using com.zameen.Exceptions;
 using com.zameen.Models;
 using com.zameen.Models.Dto.Request;
 using com.zameen.Models.Dto.Response;
 using com.zameen.Repositories.Interfaces;
 using com.zameen.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace com.zameen.Services.Implementation;
@@ -19,59 +19,76 @@ public class AuthService(
     IRefreshTokenRepository _refreshTokenRepo,
     IConfiguration _configuration,
     ILogger<AuthService> _logger,
-    JwtTokenService jwtService
+    JwtTokenService jwtService,
+    ApplicationDbContext _dbContext
 ) : IAuthService
 {
     public async Task<ApiResponse<TokenResponse>> RegisterAsync(RegisterRequest dto)
     {
         _logger.LogInformation("Registration attempt for {Email}", dto.Email);
+
         var existingUser = await _userManager.FindByEmailAsync(dto.Email);
         if (existingUser != null)
-            return ApiResponse<TokenResponse>.Fail("Email already registered.");
+            throw new ResourceAlreadyExistsException("Email already registered.");
 
-        var user = new ApplicationUser
+        using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+        try
         {
-            UserName = dto.Email,
-            Email = dto.Email,
-            FullName = dto.FullName,
-        };
-
-        var result = await _userManager.CreateAsync(user, dto.Password);
-        if (!result.Succeeded)
-        {
-            _logger.LogWarning(
-                "Registration failed for {Email}: {Errors}",
-                dto.Email,
-                string.Join(", ", result.Errors.Select(e => e.Description))
-            );
-            return ApiResponse<TokenResponse>.Fail(
-                "User creation failed.",
-                result.Errors.Select(e => e.Description)
-            );
-        }
-
-        await _userManager.AddToRoleAsync(user, "User");
-
-        // Optionally create Agent profile if AgencyName provided
-        if (!string.IsNullOrWhiteSpace(dto.AgencyName))
-        {
-            var agent = new Agent
+            var user = new ApplicationUser
             {
-                Id = Guid.NewGuid().ToString(),
-                UserId = user.Id.ToString(),
-                AgencyName = dto.AgencyName,
-                AccountStatus = Models.Enums.AccountStatus.PENDING,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
+                UserName = dto.Email,
+                Email = dto.Email,
+                FullName = dto.FullName,
             };
 
-            // Saving as Agent
-            // agentRepo.AddAsync(agent);
-        }
+            var result = await _userManager.CreateAsync(user, dto.Password);
+            if (!result.Succeeded)
+            {
+                _logger.LogWarning(
+                    "Registration failed for {Email}: {Errors}",
+                    dto.Email,
+                    string.Join(", ", result.Errors.Select(e => e.Description))
+                );
+                return ApiResponse<TokenResponse>.Fail(
+                    "User creation failed.",
+                    result.Errors.Select(e => e.Description)
+                );
+            }
 
-        var tokens = await jwtService.GenerateTokensAsync(user);
-        _logger.LogInformation("User {Email} registered successfully", dto.Email);
-        return ApiResponse<TokenResponse>.Ok(tokens, "Registration successful.");
+            await _userManager.AddToRoleAsync(user, "User");
+
+            if (dto.IsAgency)
+            {
+                await _userManager.AddToRoleAsync(user, "Agent");
+
+                var agent = new Agent
+                {
+                    UserId = user.Id.ToString(),
+                    AgencyName = dto.AgencyName ?? "Unknown Agency",
+                    Bio = dto.Bio,
+                    ProfilePic = dto.ProfilePic ?? "",
+                };
+
+                // Directly add to DbContext (no SaveChangesAsync here)
+                await _dbContext.Set<Agent>().AddAsync(agent);
+            }
+
+            // At this point, both user and agent are tracked but not committed.
+            // SaveChangesAsync will persist both inside the transaction.
+            await _dbContext.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+
+            var tokens = await jwtService.GenerateTokensAsync(user);
+            _logger.LogInformation("User {Email} registered successfully", dto.Email);
+            return ApiResponse<TokenResponse>.Ok(tokens, "Registration successful.");
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task<ApiResponse<TokenResponse>> LoginAsync(LoginRequest dto, string? ipAddress)
@@ -79,7 +96,7 @@ public class AuthService(
         _logger.LogInformation("Login attempt for {Email}", dto.Email);
         var user = await _userManager.FindByEmailAsync(dto.Email);
         if (user == null)
-            return ApiResponse<TokenResponse>.Fail("Invalid credentials.");
+            throw new UnauthorizedException("No account registered with this email.");
 
         var signInResult = await _signInManager.CheckPasswordSignInAsync(
             user,
@@ -89,7 +106,7 @@ public class AuthService(
         if (!signInResult.Succeeded)
         {
             _logger.LogWarning("Invalid password for {Email}", dto.Email);
-            return ApiResponse<TokenResponse>.Fail("Invalid credentials.");
+            throw new UnauthorizedException("Invalid Credentials.");
         }
 
         var tokens = await jwtService.GenerateTokensAsync(user, ipAddress);
@@ -105,15 +122,15 @@ public class AuthService(
         _logger.LogInformation("Refresh token request received");
         var principal = GetPrincipalFromExpiredToken(dto.AccessToken);
         if (principal == null)
-            return ApiResponse<TokenResponse>.Fail("Invalid access token.");
+            throw new UnauthorizedException("Invalid access token.");
 
         var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
-            return ApiResponse<TokenResponse>.Fail("Invalid token claims.");
+            throw new UnauthorizedException("Invalid token claims.");
 
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
-            return ApiResponse<TokenResponse>.Fail("User not found.");
+            throw new ResourceNotFoundException("User not found.");
 
         var storedRefreshToken = await _refreshTokenRepo.GetByTokenAsync(dto.RefreshToken);
         if (
@@ -121,7 +138,7 @@ public class AuthService(
             || storedRefreshToken.UserId != Guid.Parse(userId)
             || !storedRefreshToken.IsActive
         )
-            return ApiResponse<TokenResponse>.Fail("Invalid or expired refresh token.");
+            throw new UnauthorizedException("Invalid or expired refresh token.");
 
         // Revoke old refresh token
         storedRefreshToken.IsRevoked = true;
