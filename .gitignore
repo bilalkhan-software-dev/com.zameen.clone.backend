@@ -1,4 +1,4 @@
-##   ASP.NET Core / .NET Stable Generic Gitignore   ##
+## ASP.NET Core / .NET Stable Generic Gitignore ##
 ######################################################
 
 # Combined build outputs and artifacts
@@ -33,11 +33,12 @@ obj/
 !.vscode/extensions.json
 !.vscode/code-snippets
 
-# Local user secrets configurations for ASP.NET Core
-# (Never commit actual database connection strings or production API keys!)
+# Local user secrets and environment‑specific settings
 secrets.json
 [App_Data]/
 appsettings.Development.json
+# Also ignore production config if it contains real secrets
+# appsettings.Production.json   # uncomment if you keep secrets here
 
 # Tooling, diagnostic logs, and crash dumps
 *.log
@@ -46,14 +47,16 @@ appsettings.Development.json
 *.dmp
 .diagnostic/
 
-# NuGet Package Manager folders
-# (Packages are automatically restored by the compiler via .csproj)
+# Runtime logs folder (your Serilog file sink)
+Logs/
+
+# NuGet Package Manager folders (packages are restored by the compiler)
 *.nuget.props
 *.nuget.targets
 pkgs/
 packages/
 
-# Entity Framework Core migrations & bundle caches
+# Build outputs and EF Core temporary files
 *.exe
 *.dll
 *.pdb
@@ -62,3 +65,8 @@ packages/
 # OS-specific hidden file clutter
 .DS_Store
 Thumbs.db
+
+# ─── Entity Framework Migrations ──────────────────────────
+# Migrations are source code and should usually be tracked.
+# Only uncomment the next line if you want to ignore them.
+# Migrations/
