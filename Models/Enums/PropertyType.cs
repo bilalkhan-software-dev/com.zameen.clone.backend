@@ -5,6 +5,6 @@
         HOUSE,
         FLAT,
         COMMERCIAL,
-        SHOP
+        SHOP,
     }
 }

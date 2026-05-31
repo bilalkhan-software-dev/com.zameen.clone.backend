@@ -8,14 +8,8 @@ namespace com.zameen.Controllers
     [ApiController]
     [Route("api/admin/[controller]")]
     [Authorize(Policy = "AdminOnly")]
-    public class UserManagementController(
-        IUserService userService,
-        ILogger<UserManagementController> logger
-    ) : ControllerBase
+    public class AdminController(IUserService _userService) : ControllerBase
     {
-        private readonly IUserService _userService = userService;
-        private readonly ILogger<UserManagementController> _logger = logger;
-
         [HttpGet("users")]
         public async Task<IActionResult> GetUsers()
         {

@@ -6,6 +6,8 @@ namespace com.zameen.Models.Dto.Request
         public string Password { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
 
+        public string? ProfilePic { get; set; }
+
         public bool IsAgency { get; set; } = false;
 
         // If Registering as an agency, this field can be provided

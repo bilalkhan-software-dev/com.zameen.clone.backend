@@ -3,6 +3,7 @@ using com.zameen.Models;
 using com.zameen.Models.Dto.Request;
 using com.zameen.Models.Dto.Response;
 using com.zameen.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,6 +11,7 @@ namespace com.zameen.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[AllowAnonymous]
 public class AuthController(
     IAuthService authService,
     SignInManager<ApplicationUser> signInManager,
@@ -69,11 +71,6 @@ public class AuthController(
         return Ok(ApiResponse.Ok("Token revoked successfully."));
     }
 
-    // ─── Google OAuth 2.0 (challenge flow) ──────────────────────
-
-    /// <summary>
-    /// Starts the Google login challenge. The user will be redirected to Google.
-    /// </summary>
     [HttpGet("google-login")]
     public IActionResult GoogleLogin()
     {

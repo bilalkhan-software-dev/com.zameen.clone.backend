@@ -12,6 +12,7 @@ public class PropertyResponse
     public int Bathrooms { get; set; }
     public decimal AreaSize { get; set; }
     public string AreaUnit { get; set; } = string.Empty;
+    public List<string> PropertyPics { get; set; } = [];
     public string PropertyType { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
     public bool IsActive { get; set; }

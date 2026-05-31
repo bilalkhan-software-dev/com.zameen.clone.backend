@@ -8,10 +8,54 @@ services:
       - "1433:1433"
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=Password123
+      - MSSQL_SA_PASSWORD=Password123!
     volumes:
       - mssql_data:/var/opt/mssql
 
 volumes:
   mssql_data:
     driver: local
+
+
+# services:
+#   db:
+#     image: mcr.microsoft.com/mssql/server:2022-latest
+#     environment:
+#       SA_PASSWORD: "YourStrong(!)Passw0rd"
+#       ACCEPT_EULA: "Y"
+#     ports:
+#       - "1433:1433"
+#     volumes:
+#       - mssql_data:/var/opt/mssql
+
+#   backend:
+#     build:
+#       context: ./com.zameen
+#       dockerfile: Dockerfile
+#     environment:
+#       ASPNETCORE_ENVIRONMENT: Development
+#       ConnectionStrings__DefaultConnection: "Server=db;Database=PropertyHubDb;User Id=sa;Password=YourStrong(!)Passw0rd;TrustServerCertificate=true;"
+#       Jwt__Key: "YourSuperSecretKeyAtLeast32CharactersLong!"
+#       Jwt__Issuer: "http://localhost:5118"
+#       Jwt__Audience: "http://localhost:5118"
+#       Authentication__Google__ClientId: "your-google-client-id"
+#       Authentication__Google__ClientSecret: "your-google-client-secret"
+#       Frontend__BaseUrl: "http://localhost:3000"
+#     ports:
+#       - "5118:80"
+#     depends_on:
+#       - db
+
+#   frontend:
+#     build:
+#       context: ./com.zameen.clone.frontend
+#       dockerfile: Dockerfile
+#     environment:
+#       NEXT_PUBLIC_API_BASE_URL: "http://localhost:5118"
+#     ports:
+#       - "3000:3000"
+#     depends_on:
+#       - backend
+
+# volumes:
+#   mssql_data:    

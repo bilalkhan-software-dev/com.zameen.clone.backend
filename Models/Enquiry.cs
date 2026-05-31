@@ -1,8 +1,6 @@
-
-
 namespace com.zameen.Models
 {
-    public class Enquiry
+    public class Enquiry : AbstractEntity
     {
         public int Id { get; set; }
         public int PropertyId { get; set; }
@@ -11,6 +9,5 @@ namespace com.zameen.Models
         public string SenderEmail { get; set; } = string.Empty;
         public string? Phone { get; set; }
         public string Message { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

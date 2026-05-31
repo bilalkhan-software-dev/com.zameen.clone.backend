@@ -1,0 +1,532 @@
+{
+  "info": {
+    "name": "PropertyHub API",
+    "description": "API collection for PropertyHub real‑estate portal. Separate authentication variables for Admin and Agent roles.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{UserAccessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5118"
+    },
+    {
+      "key": "AdminAccessToken",
+      "value": ""
+    },
+    {
+      "key": "AgentAccessToken",
+      "value": ""
+    },
+    {
+      "key": "UserAccessToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"P@ssword1\",\n  \"fullName\": \"John Doe\",\n  \"profilePic\": null,\n  \"isAgency\": false,\n  \"agencyName\": null,\n  \"bio\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"P@ssword1\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accessToken\": \"{{accessToken}}\",\n  \"refreshToken\": \"your-refresh-token-here\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Auth", "refresh"]
+            }
+          }
+        },
+        {
+          "name": "Logout / Revoke Token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"your-refresh-token-here\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Auth", "logout"]
+            }
+          }
+        },
+        {
+          "name": "Google Login (redirect)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/Auth/google-login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Auth", "google-login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{UserAccessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/User/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "User", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"old-password\",\n  \"newPassword\": \"new-secure-password\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/User/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "User", "change-password"]
+            }
+          }
+        },
+        {
+          "name": "Debug (if available)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/User/debug",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "User", "debug"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Agent",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{AgentAccessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Get My Agent Profile",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/Agent/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Agent", "me"]
+            }
+          }
+        },
+        {
+          "name": "Update My Agent Profile",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"agencyName\": \"My Agency\",\n  \"bio\": \"Updated bio\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Agent/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Agent", "me"]
+            }
+          }
+        },
+        {
+          "name": "List Agents (Admin access – override token manually if needed)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/Agent?page=1&size=10&status=APPROVED&sortBy=CreatedAt&descending=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Agent"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "size", "value": "10" },
+                { "key": "status", "value": "APPROVED" },
+                { "key": "sortBy", "value": "CreatedAt" },
+                { "key": "descending", "value": "true" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Agent by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/Agent/{{agentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Agent", "{{agentId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Agent (Admin)",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/Agent/{{agentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Agent", "{{agentId}}"]
+            }
+          }
+        },
+        {
+          "name": "Approve Agent",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/Agent/{{agentId}}/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Agent", "{{agentId}}", "approve"]
+            }
+          }
+        },
+        {
+          "name": "Reject Agent",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/Agent/{{agentId}}/reject",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Agent", "{{agentId}}", "reject"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{AdminAccessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/Admin/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "Admin", "users"]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/Admin/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "Admin", "users", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/Admin/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "Admin", "users", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update User Roles",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"user-guid\",\n  \"roles\": [\"Admin\", \"Agent\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/Admin/users/roles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "Admin", "users", "roles"]
+            }
+          }
+        },
+        {
+          "name": "Change User Account Status",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"user-guid\",\n  \"newStatus\": \"APPROVED\"\n}\n// Options: BANNED, APPROVED, PENDING, REJECTED"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/Admin/users/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "Admin", "users", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Property",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{AgentAccessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Search Properties (public – no auth)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/Property?City=Lahore&PropertyType=HOUSE&Status=APPROVED&MinPrice=100000&MaxPrice=1000000&MinBedrooms=2&MinAreaSize=5&SearchTerm=flat&Page=1&PageSize=10&SortBy=price&IsDescending=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Property"],
+              "query": [
+                { "key": "City", "value": "Lahore" },
+                { "key": "PropertyType", "value": "HOUSE" },
+                { "key": "Status", "value": "APPROVED" },
+                { "key": "MinPrice", "value": "100000" },
+                { "key": "MaxPrice", "value": "1000000" },
+                { "key": "MinBedrooms", "value": "2" },
+                { "key": "MinAreaSize", "value": "5" },
+                { "key": "SearchTerm", "value": "flat" },
+                { "key": "Page", "value": "1" },
+                { "key": "PageSize", "value": "10" },
+                { "key": "SortBy", "value": "price" },
+                { "key": "IsDescending", "value": "false" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Property by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/Property/{{propertyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Property", "{{propertyId}}"]
+            }
+          }
+        },
+        {
+          "name": "Create Property (Agent)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Beautiful Apartment in Clifton\",\n  \"description\": \"Spacious 3-bedroom apartment with sea view.\",\n  \"price\": 25000000,\n  \"city\": \"Karachi\",\n  \"address\": \"Clifton Block 5\",\n  \"propertyPics\": [\"https://picsum.photos/800/600?random=1\"],\n  \"bedrooms\": 3,\n  \"bathrooms\": 2,\n  \"areaSize\": 1800,\n  \"areaUnit\": \"SQUARE_FEET\",\n  \"propertyType\": \"FLAT\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Property",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Property"]
+            }
+          }
+        },
+        {
+          "name": "Update Property (PATCH) – partial update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 30000000,\n  \"bedrooms\": 4\n}\n// Only the provided fields will be updated. Use null to remove a field (if supported)."
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Property/{{propertyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Property", "{{propertyId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Property (Soft Delete)",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/Property/{{propertyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Property", "{{propertyId}}"]
+            }
+          }
+        },
+        {
+          "name": "Toggle Active Status",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/Property/{{propertyId}}/toggle-active",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Property", "{{propertyId}}", "toggle-active"]
+            }
+          }
+        },
+        {
+          "name": "My Properties (Agent Dashboard)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/Property/my-properties?page=1&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Property", "my-properties"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Enquiry",
+      "item": [
+        {
+          "name": "Send Enquiry (public)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"propertyId\": 1,\n  \"senderName\": \"Jane Smith\",\n  \"senderEmail\": \"jane@example.com\",\n  \"phone\": \"+923001234567\",\n  \"message\": \"I am interested in this property.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/Enquiry",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Enquiry"]
+            }
+          }
+        },
+        {
+          "name": "Get Enquiries for Property (Agent/Admin)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/Enquiry/property/{{propertyId}}?page=1&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Enquiry", "property", "{{propertyId}}"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Enquiry by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/Enquiry/{{enquiryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Enquiry", "{{enquiryId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Enquiry (Admin)",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/Enquiry/{{enquiryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "Enquiry", "{{enquiryId}}"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

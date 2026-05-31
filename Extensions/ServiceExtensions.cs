@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Security.Claims;
+using System.Text;
 using com.zameen.Data;
 using com.zameen.Exceptions;
 using com.zameen.Models;
@@ -10,6 +11,7 @@ using com.zameen.Services.Interfaces;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -26,6 +28,13 @@ namespace com.zameen.Extensions
         {
             services
                 .AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    // This makes ALL enums appear as their name (e.g., "PENDING", "Approved")
+                    options.JsonSerializerOptions.Converters.Add(
+                        new System.Text.Json.Serialization.JsonStringEnumConverter()
+                    );
+                })
                 .ConfigureApiBehaviorOptions(options =>
                 {
                     // Intercept automatic 400 responses and throw our custom exception
@@ -75,6 +84,8 @@ namespace com.zameen.Extensions
                         ValidIssuer = configuration["Jwt:Issuer"],
                         ValidAudience = configuration["Jwt:Audience"],
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+                        NameClaimType = ClaimTypes.NameIdentifier,
+                        RoleClaimType = ClaimTypes.Role,
                         ClockSkew = TimeSpan.Zero,
                     };
                 })
@@ -90,8 +101,19 @@ namespace com.zameen.Extensions
             // Authorization policies
             services.AddAuthorization(options =>
             {
+                options.FallbackPolicy = new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .Build();
                 options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
                 options.AddPolicy("AgentOnly", policy => policy.RequireRole("Agent"));
+                options.AddPolicy(
+                    "AdminAndAgentOnly",
+                    policy =>
+                    {
+                        policy.RequireRole("Agent");
+                        policy.RequireRole("Admin");
+                    }
+                );
             });
 
             // FluentValidation
@@ -104,21 +126,30 @@ namespace com.zameen.Extensions
             // Application Repositories
             services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+            services.AddScoped<IAgentRepository, AgentRepository>();
+            services.AddScoped<IPropertyRepository, PropertyRepository>();
+            services.AddScoped<IEnquiryRepository, EnquiryRepository>();
 
             // Application services
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IAgentService, AgentService>();
+            services.AddScoped<IPropertyService, PropertyService>();
+            services.AddScoped<IEnquiryService, EnquiryService>();
 
             services.AddScoped<JwtTokenService>();
 
             // AutoMapper
-            services.AddAutoMapper(typeof(Program));
+            services.AddAutoMapper(cfg =>
+            {
+                cfg.AddMaps(AppDomain.CurrentDomain.GetAssemblies());
+            });
 
             var frontendUrl = configuration["Frontend:BaseUrl"];
 
             if (string.IsNullOrEmpty(frontendUrl))
             {
-                // Fallback block to prevent breaking your build if appsettings is empty
+                // Fallback
                 frontendUrl = "http://localhost:3000";
             }
 
@@ -146,35 +177,17 @@ namespace com.zameen.Extensions
                     "Bearer",
                     new OpenApiSecurityScheme
                     {
-                        Description =
-                            "JWT Authorization header using the Bearer scheme. Enter your token.",
                         Name = "Authorization",
+                        Type = SecuritySchemeType.Http,
+                        Scheme = "bearer",
+                        BearerFormat = "JWT",
                         In = ParameterLocation.Header,
-                        Type = SecuritySchemeType.ApiKey,
-                        Scheme = "Bearer",
                     }
                 );
-
-                // c.AddSecurityRequirement(
-                //     new OpenApiSecurityRequirement
-                //     {
-                //         {
-                //             new OpenApiSecurityScheme
-                //             {
-                //                 Reference = new OpenApiReference
-                //                 {
-                //                     Type = ReferenceType.SecurityScheme,
-                //                     Id = "Bearer",
-                //                 },
-                //             },
-                //             Array.Empty<string>()
-                //         },
-                //     }
-                // );
             });
 
             // Health checks
-            // services.AddHealthChecks().AddDbContextCheck<ApplicationDbContext>("Database");
+            services.AddHealthChecks();
 
             return services;
         }
