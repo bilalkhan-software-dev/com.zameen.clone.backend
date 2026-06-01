@@ -1,6 +1,6 @@
 # PropertyHub – Zameen.com Clone (Internship Project)
 
-A full‑stack real‑estate portal built with **ASP.NET Core 10** (preview) and **Next.js 14 + MUI + TypeScript**.  
+A full‑stack real‑estate portal built with **ASP.NET Core 10** (preview) and **Next.js 16.2.6 + MUI + TypeScript**.  
 Features JWT authentication, Google OAuth2, role‑based access (User/Agent/Admin), advanced property search with pagination, and Docker support.
 
 ## ✨ Key Features
@@ -21,8 +21,8 @@ Features JWT authentication, Google OAuth2, role‑based access (User/Agent/Admi
 | Layer    | Technology                                                     |
 | -------- | -------------------------------------------------------------- |
 | Backend  | ASP.NET Core 10 (preview), EF Core, Identity, JWT, Swashbuckle |
-| Frontend | Next.js 14 (App Router), React 18, MUI 5, TypeScript, Axios    |
-| Database | SQL Server 2022                                                |
+| Frontend | Next.js 16.2.6 (App Router), React 19.2.4, MUI 9.0.1, TypeScript, Axios    |
+| Database | SQL Server 2025                                                |
 | DevOps   | Docker, Docker Compose                                         |
 
 ---
