@@ -11,6 +11,9 @@ public interface IAgentService
     Task<ApiResponse<AgentResponse>> GetAgentByIdAsync(string agentId);
     Task<ApiResponse<AgentResponse>> UpdateAgentAsync(string userId, UpdateAgentRequest request);
     Task<ApiResponse> DeleteAgentAsync(string agentId, string requestingUserId); // admin only?
+
+    Task<ApiResponse> ChangeAgentStatusAsync(string agentId, AccountStatus newStatus);
+
     Task<ApiResponse<PagedResult<AgentResponse>>> GetAgentsAsync(
         int page,
         int size,

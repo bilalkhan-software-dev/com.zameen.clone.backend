@@ -6,14 +6,17 @@ using Microsoft.AspNetCore.Mvc;
 namespace com.zameen.Controllers
 {
     [ApiController]
-    [Route("api/admin/[controller]")]
+    [Route("api/[controller]")]
     [Authorize(Policy = "AdminOnly")]
     public class AdminController(IUserService _userService) : ControllerBase
     {
         [HttpGet("users")]
-        public async Task<IActionResult> GetUsers()
+        public async Task<IActionResult> GetUsers(
+            [FromQuery] int page = 1,
+            [FromQuery] int size = 10
+        )
         {
-            var result = await _userService.GetAllUsersAsync();
+            var result = await _userService.GetAllUsersAsync(page, size);
             return Ok(result);
         }
 

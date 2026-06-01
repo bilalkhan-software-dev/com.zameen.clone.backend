@@ -13,12 +13,18 @@ public class UserService(UserManager<ApplicationUser> userManager, ILogger<UserS
     private readonly UserManager<ApplicationUser> _userManager = userManager;
     private readonly ILogger<UserService> _logger = logger;
 
-    public async Task<ApiResponse<IEnumerable<UserResponse>>> GetAllUsersAsync()
+    public async Task<ApiResponse<PagedResult<UserResponse>>> GetAllUsersAsync(int page, int size)
     {
-        _logger.LogInformation("Admin fetching all users");
-        var users = await _userManager.Users.ToListAsync();
-        var userDtos = new List<UserResponse>();
+        _logger.LogInformation("Admin fetching users page {Page} size {Size}", page, size);
 
+        var totalUsers = await _userManager.Users.CountAsync();
+        var users = await _userManager
+            .Users.OrderByDescending(u => u.Id) // or by any field you prefer, e.g., u.UserName
+            .Skip((page - 1) * size)
+            .Take(size)
+            .ToListAsync();
+
+        var userDtos = new List<UserResponse>();
         foreach (var user in users)
         {
             var roles = await _userManager.GetRolesAsync(user);
@@ -34,7 +40,15 @@ public class UserService(UserManager<ApplicationUser> userManager, ILogger<UserS
             );
         }
 
-        return ApiResponse<IEnumerable<UserResponse>>.Ok(userDtos);
+        var pagedResult = new PagedResult<UserResponse>
+        {
+            Items = userDtos,
+            TotalCount = totalUsers,
+            Page = page,
+            PageSize = size,
+        };
+
+        return ApiResponse<PagedResult<UserResponse>>.Ok(pagedResult);
     }
 
     public async Task<ApiResponse<UserResponse>> GetUserByIdAsync(string userId)
@@ -124,21 +138,23 @@ public class UserService(UserManager<ApplicationUser> userManager, ILogger<UserS
         return ApiResponse.Ok("User deleted successfully.");
     }
 
-    public async Task<ApiResponse<UserProfileResponse>> GetProfileAsync(string userId)
+    public async Task<ApiResponse<UserResponse>> GetProfileAsync(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
-            return ApiResponse<UserProfileResponse>.Fail("User not found.");
+            return ApiResponse<UserResponse>.Fail("User not found.");
 
-        var profile = new UserProfileResponse
+        var roles = await _userManager.GetRolesAsync(user);
+
+        var profile = new UserResponse
         {
             Id = user.Id.ToString(),
             Email = user.Email!,
             FullName = user.FullName ?? "",
-            PhoneNumber = user.PhoneNumber,
-            UserName = user.UserName!,
+            AccountStatus = user.AccountStatus,
+            Roles = roles,
         };
-        return ApiResponse<UserProfileResponse>.Ok(profile);
+        return ApiResponse<UserResponse>.Ok(profile);
     }
 
     public async Task<ApiResponse> ChangePasswordAsync(string userId, ChangePasswordRequest request)

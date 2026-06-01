@@ -43,6 +43,18 @@ public class AgentService(
         return ApiResponse<AgentResponse>.Ok(response, "Agent profile created.");
     }
 
+    public async Task<ApiResponse> ChangeAgentStatusAsync(string agentId, AccountStatus newStatus)
+    {
+        var agent = await _agentRepo.GetByIdAsync(agentId);
+        if (agent == null)
+            throw new ResourceNotFoundException("Agent not found.");
+        agent.AccountStatus = newStatus;
+        agent.UpdatedAt = DateTime.UtcNow;
+        _agentRepo.Update(agent);
+        await _agentRepo.SaveChangesAsync();
+        return ApiResponse.Ok("Agent status updated.");
+    }
+
     public async Task<ApiResponse<AgentResponse>> GetAgentByUserIdAsync(string userId)
     {
         _logger.LogDebug("Fetching agent by UserId {UserId}", userId);

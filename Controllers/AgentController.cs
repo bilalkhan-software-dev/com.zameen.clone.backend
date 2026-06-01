@@ -37,6 +37,17 @@ public class AgentController(IAgentService _agentService) : ControllerBase
         return Ok(result);
     }
 
+    [HttpPut("{agentId}/status")]
+    [Authorize(Policy = "AdminOnly")]
+    public async Task<IActionResult> ChangeAgentStatus(
+        string agentId,
+        [FromBody] AccountStatus newStatus
+    )
+    {
+        var result = await _agentService.ChangeAgentStatusAsync(agentId, newStatus);
+        return Ok(result);
+    }
+
     // ─── Admin operations ─────────────
     [HttpGet]
     [AllowAnonymous]
