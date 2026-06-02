@@ -37,17 +37,6 @@ public class AgentController(IAgentService _agentService) : ControllerBase
         return Ok(result);
     }
 
-    [HttpPut("{agentId}/status")]
-    [Authorize(Policy = "AdminOnly")]
-    public async Task<IActionResult> ChangeAgentStatus(
-        string agentId,
-        [FromBody] AccountStatus newStatus
-    )
-    {
-        var result = await _agentService.ChangeAgentStatusAsync(agentId, newStatus);
-        return Ok(result);
-    }
-
     [HttpGet]
     [AllowAnonymous]
     public async Task<IActionResult> GetAgents(
@@ -67,31 +56,6 @@ public class AgentController(IAgentService _agentService) : ControllerBase
     public async Task<IActionResult> GetAgentById(string agentId)
     {
         var result = await _agentService.GetAgentByIdAsync(agentId);
-        return Ok(result);
-    }
-
-    [HttpPut("{agentId}/approve")]
-    [Authorize(Policy = "AdminOnly")]
-    public async Task<IActionResult> ApproveAgent(string agentId)
-    {
-        var result = await _agentService.ApproveAgentAsync(agentId);
-        return Ok(result);
-    }
-
-    [HttpPut("{agentId}/reject")]
-    [Authorize(Policy = "AdminOnly")]
-    public async Task<IActionResult> RejectAgent(string agentId)
-    {
-        var result = await _agentService.RejectAgentAsync(agentId);
-        return Ok(result);
-    }
-
-    [HttpDelete("{agentId}")]
-    [Authorize(Policy = "AdminOnly")]
-    public async Task<IActionResult> DeleteAgent(string agentId)
-    {
-        var adminUserId = GetUserId();
-        var result = await _agentService.DeleteAgentAsync(agentId, adminUserId);
         return Ok(result);
     }
 }

@@ -13,43 +13,38 @@ public class EnquiryService(
     IPropertyRepository propertyRepo,
     IMapper mapper,
     ILogger<EnquiryService> logger
-    ) : IEnquiryService
+) : IEnquiryService
 {
-    private readonly IEnquiryRepository _enquiryRepo = enquiryRepo;
-    private readonly IPropertyRepository _propertyRepo = propertyRepo;
-    private readonly IMapper _mapper = mapper;
-    private readonly ILogger<EnquiryService> _logger = logger;
-
     public async Task<ApiResponse<EnquiryResponse>> SendEnquiryAsync(CreateEnquiryRequest request)
     {
-        _logger.LogInformation(
+        logger.LogInformation(
             "Enquiry from {Email} for property {PropertyId}",
             request.SenderEmail,
             request.PropertyId
         );
 
-        var property = await _propertyRepo.GetByIdAsync(request.PropertyId);
+        var property = await propertyRepo.GetByIdAsync(request.PropertyId);
         if (property == null || !property.IsActive)
             throw new ResourceNotFoundException("Property not available.");
 
-        var enquiry = _mapper.Map<Enquiry>(request);
+        var enquiry = mapper.Map<Enquiry>(request);
         enquiry.CreatedAt = DateTime.UtcNow;
-        await _enquiryRepo.AddAsync(enquiry);
-        _logger.LogInformation("Enquiry created ID {EnquiryId}", enquiry.Id);
+        await enquiryRepo.AddAsync(enquiry);
+        logger.LogInformation("Enquiry created ID {EnquiryId}", enquiry.Id);
 
         return ApiResponse<EnquiryResponse>.Ok(
-            _mapper.Map<EnquiryResponse>(enquiry),
+            mapper.Map<EnquiryResponse>(enquiry),
             "Enquiry submitted."
         );
     }
 
     public async Task<ApiResponse<EnquiryResponse>> GetEnquiryByIdAsync(int id)
     {
-        var enquiry = await _enquiryRepo.GetByIdAsync(id);
+        var enquiry = await enquiryRepo.GetByIdAsync(id);
         if (enquiry == null)
             throw new ResourceNotFoundException("Enquiry not found.");
 
-        return ApiResponse<EnquiryResponse>.Ok(_mapper.Map<EnquiryResponse>(enquiry));
+        return ApiResponse<EnquiryResponse>.Ok(mapper.Map<EnquiryResponse>(enquiry));
     }
 
     public async Task<ApiResponse<PagedResult<EnquiryResponse>>> GetEnquiriesForPropertyAsync(
@@ -58,8 +53,8 @@ public class EnquiryService(
         int size
     )
     {
-        var paged = await _enquiryRepo.GetByPropertyIdAsync(propertyId, page, size);
-        var dtos = _mapper.Map<IEnumerable<EnquiryResponse>>(paged.Items);
+        var paged = await enquiryRepo.GetByPropertyIdAsync(propertyId, page, size);
+        var dtos = mapper.Map<IEnumerable<EnquiryResponse>>(paged.Items);
 
         return ApiResponse<PagedResult<EnquiryResponse>>.Ok(
             new PagedResult<EnquiryResponse>
@@ -74,15 +69,36 @@ public class EnquiryService(
 
     public async Task<ApiResponse> DeleteEnquiryAsync(int id, string adminUserId)
     {
-        _logger.LogWarning("Deleting enquiry {EnquiryId} by admin {AdminUserId}", id, adminUserId);
+        logger.LogWarning("Deleting enquiry {EnquiryId} by admin {AdminUserId}", id, adminUserId);
 
-        var enquiry = await _enquiryRepo.GetByIdAsync(id);
+        var enquiry = await enquiryRepo.GetByIdAsync(id);
         if (enquiry == null)
             throw new ResourceNotFoundException("Enquiry not found.");
 
-        _enquiryRepo.Delete(enquiry);
-        await _enquiryRepo.SaveChangesAsync();
-        _logger.LogInformation("Enquiry {EnquiryId} deleted", id);
+        enquiryRepo.Delete(enquiry);
+        await enquiryRepo.SaveChangesAsync();
+        logger.LogInformation("Enquiry {EnquiryId} deleted", id);
         return ApiResponse.Ok("Enquiry deleted.");
+    }
+
+    public async Task<ApiResponse<PagedResult<EnquiryResponse>>> GetAllEnquiries(
+        int page,
+        int size,
+        string sortBy,
+        bool isNewest
+    )
+    {
+        var paged = await enquiryRepo.GetPagedAsync(page, size, sortBy, isNewest);
+        var dtos = mapper.Map<IEnumerable<EnquiryResponse>>(paged.Items);
+
+        return ApiResponse<PagedResult<EnquiryResponse>>.Ok(
+            new PagedResult<EnquiryResponse>
+            {
+                Items = dtos,
+                TotalCount = paged.TotalCount,
+                Page = page,
+                PageSize = size,
+            }
+        );
     }
 }

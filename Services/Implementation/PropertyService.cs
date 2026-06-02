@@ -4,6 +4,7 @@ using com.zameen.Models;
 using com.zameen.Models.Dto.Request;
 using com.zameen.Models.Dto.Response;
 using com.zameen.Models.Enums;
+using com.zameen.Repositories.Implementation;
 using com.zameen.Repositories.Interfaces;
 using com.zameen.Services.Interfaces;
 
@@ -72,23 +73,30 @@ public class PropertyService(
         string agentUserId
     )
     {
-        _logger.LogInformation("Creating property by agent user {UserId}", agentUserId);
+        _logger.LogInformation("Creating property for user {UserId}", agentUserId);
 
         var agent = await _agentRepo.GetByUserIdAsync(agentUserId);
         if (agent == null || agent.AccountStatus != AccountStatus.APPROVED)
             return ApiResponse<PropertyResponse>.Fail("Agent not found or not approved.");
 
-        bool exists = await _propertyRepo.ExistsByTitleAsync(request.Title);
-        if (exists)
+        if (await _propertyRepo.ExistsByTitleAsync(request.Title))
             throw new ResourceAlreadyExistsException("A property with this title already exists.");
 
         var property = _mapper.Map<Property>(request);
-        property.AgentId = agent.Id;
-        property.IsActive = true;
+        property.AgentId = agent.Id; // ← fix here
         property.PropertyPics = request.PropertyPics ?? [];
+        property.Status = PropertyStatus.PENDING; // set a default status
+        property.IsActive = true;
 
         await _propertyRepo.AddAsync(property);
-        _logger.LogInformation("Property created with ID {PropertyId}", property.Id);
+        // AddAsync already calls SaveChangesAsync, but we can call again just in case
+        // await _propertyRepo.SaveChangesAsync();
+
+        _logger.LogInformation(
+            "Property {PropertyId} created by agent {AgentId}",
+            property.Id,
+            agent.Id
+        );
 
         var response = _mapper.Map<PropertyResponse>(property);
         response.AgentName = agent.AgencyName;
@@ -191,7 +199,7 @@ public class PropertyService(
         if (agent == null)
             throw new ResourceNotFoundException("Agent not found.");
 
-        var paged = await _propertyRepo.GetPropertiesByAgentAsync(agent.Id, page, size);
+        var paged = await _propertyRepo.GetPropertiesByAgentAsync(agentUserId, page, size);
         var dtos = _mapper.Map<IEnumerable<PropertyResponse>>(paged.Items);
         foreach (var dto in dtos)
             dto.AgentName = agent.AgencyName;
@@ -227,5 +235,43 @@ public class PropertyService(
         string status = property.IsActive ? "activated" : "deactivated";
         _logger.LogInformation("Property {PropertyId} {Status}", id, status);
         return ApiResponse.Ok($"Property {status}.");
+    }
+
+    public async Task<ApiResponse<PagedResult<PropertyResponse>>> GetAllProperties(
+        int page,
+        int size,
+        string sortBy,
+        bool isNewest
+    )
+    {
+        var paged = await _propertyRepo.GetPagedAsync(page, size, sortBy, isNewest);
+        var dtos = _mapper.Map<IEnumerable<PropertyResponse>>(paged.Items);
+
+        return ApiResponse<PagedResult<PropertyResponse>>.Ok(
+            new PagedResult<PropertyResponse>
+            {
+                Items = dtos,
+                TotalCount = paged.TotalCount,
+                Page = page,
+                PageSize = size,
+            }
+        );
+    }
+
+    public async Task<ApiResponse> UpdatePropertyStatus(int id, PropertyStatus propertyStatus)
+    {
+        _logger.LogInformation("Update Property status for property {PropertyId}", id);
+
+        var property =
+            await _propertyRepo.GetByIdAsync(id)
+            ?? throw new ResourceNotFoundException("Property not found.");
+
+        if (property.Status.Equals(propertyStatus))
+            return ApiResponse.Ok("Property status is already " + propertyStatus);
+
+        property.Status = propertyStatus;
+        _propertyRepo.Update(property);
+        await _propertyRepo.SaveChangesAsync();
+        return ApiResponse.Ok($"Property with status {propertyStatus} update successfully.");
     }
 }

@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace com.zameen.Repositories.Implementation;
 
-// Repositories/Implementation/AgentRepository.cs
 public class AgentRepository(ApplicationDbContext context)
     : GenericRepository<Agent, string>(context),
         IAgentRepository

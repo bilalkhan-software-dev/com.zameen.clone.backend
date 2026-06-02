@@ -1,5 +1,6 @@
 using com.zameen.Models.Dto.Request;
 using com.zameen.Models.Dto.Response;
+using com.zameen.Models.Enums;
 
 namespace com.zameen.Services.Interfaces;
 
@@ -26,5 +27,14 @@ public interface IPropertyService
         int page,
         int size
     );
+
+    Task<ApiResponse<PagedResult<PropertyResponse>>> GetAllProperties(
+        int page,
+        int size,
+        string sortBy,
+        bool isNewest
+    );
+
     Task<ApiResponse> ToggleActiveAsync(int id, string agentUserId);
+    Task<ApiResponse> UpdatePropertyStatus(int id, PropertyStatus propertyStatus);
 }

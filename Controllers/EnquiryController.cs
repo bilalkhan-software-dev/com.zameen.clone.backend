@@ -36,13 +36,4 @@ public class EnquiryController(IEnquiryService _enquiryService) : ControllerBase
         var result = await _enquiryService.GetEnquiryByIdAsync(id);
         return Ok(result);
     }
-
-    [HttpDelete("{id}")]
-    [Authorize(Policy = "AdminOnly")]
-    public async Task<IActionResult> Delete(int id)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var result = await _enquiryService.DeleteEnquiryAsync(id, userId);
-        return Ok(result);
-    }
 }

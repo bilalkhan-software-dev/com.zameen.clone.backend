@@ -7,7 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace com.zameen.Repositories.Implementation;
 
-public class PropertyRepository(ApplicationDbContext context) : GenericRepository<Property, int>(context), IPropertyRepository
+public class PropertyRepository(ApplicationDbContext context)
+    : GenericRepository<Property, int>(context),
+        IPropertyRepository
 {
     public async Task<PagedResult<Property>> SearchAsync(PropertyFilterParams filters)
     {
@@ -40,31 +42,21 @@ public class PropertyRepository(ApplicationDbContext context) : GenericRepositor
         }
 
         // Sorting
-        IOrderedQueryable<Property> orderedQuery;
-        switch (filters.SortBy?.ToLower())
+        IOrderedQueryable<Property> orderedQuery = (filters.SortBy?.ToLower()) switch
         {
-            case "price":
-                orderedQuery = filters.IsDescending
-                    ? query.OrderByDescending(p => p.Price)
-                    : query.OrderBy(p => p.Price);
-                break;
-            case "areasize":
-                orderedQuery = filters.IsDescending
-                    ? query.OrderByDescending(p => p.AreaSize)
-                    : query.OrderBy(p => p.AreaSize);
-                break;
-            case "bedrooms":
-                orderedQuery = filters.IsDescending
-                    ? query.OrderByDescending(p => p.Bedrooms)
-                    : query.OrderBy(p => p.Bedrooms);
-                break;
-            default:
-                orderedQuery = filters.IsDescending
-                    ? query.OrderByDescending(p => p.CreatedAt)
-                    : query.OrderBy(p => p.CreatedAt);
-                break;
-        }
-
+            "price" => filters.IsDescending
+                ? query.OrderByDescending(p => p.Price)
+                : query.OrderBy(p => p.Price),
+            "areasize" => filters.IsDescending
+                ? query.OrderByDescending(p => p.AreaSize)
+                : query.OrderBy(p => p.AreaSize),
+            "bedrooms" => filters.IsDescending
+                ? query.OrderByDescending(p => p.Bedrooms)
+                : query.OrderBy(p => p.Bedrooms),
+            _ => filters.IsDescending
+                ? query.OrderByDescending(p => p.CreatedAt)
+                : query.OrderBy(p => p.CreatedAt),
+        };
         int total = await orderedQuery.CountAsync();
         var items = await orderedQuery
             .Skip((filters.Page - 1) * filters.PageSize)
@@ -87,7 +79,8 @@ public class PropertyRepository(ApplicationDbContext context) : GenericRepositor
     )
     {
         var query = _dbSet
-            .Where(p => p.AgentId == agentId && p.IsActive)
+            .AsNoTracking()
+            .Where(p => p.AgentId == agentId)
             .OrderByDescending(p => p.CreatedAt);
 
         int total = await query.CountAsync();
