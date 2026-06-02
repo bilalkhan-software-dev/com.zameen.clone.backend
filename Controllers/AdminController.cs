@@ -15,7 +15,7 @@ namespace com.zameen.Controllers
         public async Task<IActionResult> GetUsers(
             [FromQuery] int page = 1,
             [FromQuery] int size = 10,
-            [FromQuery] AccountStatus accountStatus
+            [FromQuery] AccountStatus? accountStatus = AccountStatus.APPROVED
         )
         {
             var result = await _userService.GetAllUsersAsync(page, size, accountStatus);
