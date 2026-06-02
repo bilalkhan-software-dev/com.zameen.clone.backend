@@ -1,4 +1,5 @@
 using com.zameen.Models.Dto.Request;
+using com.zameen.Models.Enums;
 using com.zameen.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,10 +14,11 @@ namespace com.zameen.Controllers
         [HttpGet("users")]
         public async Task<IActionResult> GetUsers(
             [FromQuery] int page = 1,
-            [FromQuery] int size = 10
+            [FromQuery] int size = 10,
+            [FromQuery] AccountStatus accountStatus
         )
         {
-            var result = await _userService.GetAllUsersAsync(page, size);
+            var result = await _userService.GetAllUsersAsync(page, size, accountStatus);
             return Ok(result);
         }
 

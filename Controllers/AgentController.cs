@@ -48,7 +48,7 @@ public class AgentController(IAgentService _agentService) : ControllerBase
         return Ok(result);
     }
 
-    // ─── Admin operations ─────────────
+   
     [HttpGet]
     [AllowAnonymous]
     public async Task<IActionResult> GetAgents(

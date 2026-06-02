@@ -25,7 +25,6 @@ public class EnquiryController(IEnquiryService _enquiryService) : ControllerBase
         [FromQuery] int size = 10
     )
     {
-        // In production, verify that the requesting agent owns the property.
         var result = await _enquiryService.GetEnquiriesForPropertyAsync(propertyId, page, size);
         return Ok(result);
     }

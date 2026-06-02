@@ -1,6 +1,7 @@
 using com.zameen.Models;
 using com.zameen.Models.Dto.Request;
 using com.zameen.Models.Dto.Response;
+using com.zameen.Models.Enums;
 using com.zameen.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -13,17 +14,39 @@ public class UserService(UserManager<ApplicationUser> userManager, ILogger<UserS
     private readonly UserManager<ApplicationUser> _userManager = userManager;
     private readonly ILogger<UserService> _logger = logger;
 
-    public async Task<ApiResponse<PagedResult<UserResponse>>> GetAllUsersAsync(int page, int size)
+    public async Task<ApiResponse<PagedResult<UserResponse>>> GetAllUsersAsync(
+        int page,
+        int size,
+        AccountStatus? accountStatus
+    )
     {
-        _logger.LogInformation("Admin fetching users page {Page} size {Size}", page, size);
+        _logger.LogInformation(
+            "Admin fetching users page {Page} size {Size} status {Status}",
+            page,
+            size,
+            accountStatus
+        );
 
-        var totalUsers = await _userManager.Users.CountAsync();
-        var users = await _userManager
-            .Users.OrderByDescending(u => u.Id) // or by any field you prefer, e.g., u.UserName
+        // Base query
+        IQueryable<ApplicationUser> query = _userManager.Users.AsNoTracking();
+
+        // Apply filter if provided
+        if (accountStatus.HasValue)
+        {
+            query = query.Where(u => u.AccountStatus == accountStatus.Value);
+        }
+
+        // Get total count after filtering
+        int totalUsers = await query.CountAsync();
+
+        // Apply ordering, then pagination
+        var users = await query
+            .OrderByDescending(u => u.CreatedAt)
             .Skip((page - 1) * size)
             .Take(size)
             .ToListAsync();
 
+        // Map to DTOs
         var userDtos = new List<UserResponse>();
         foreach (var user in users)
         {
