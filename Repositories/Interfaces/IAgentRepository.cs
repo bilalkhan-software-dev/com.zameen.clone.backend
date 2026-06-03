@@ -4,7 +4,6 @@ using com.zameen.Models.Enums;
 
 namespace com.zameen.Repositories.Interfaces;
 
-// Repositories/Interfaces/IAgentRepository.cs
 public interface IAgentRepository : IGenericRepository<Agent, string>
 {
     Task<Agent?> GetByUserIdAsync(string userId);

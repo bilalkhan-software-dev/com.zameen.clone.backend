@@ -40,6 +40,8 @@ public class AuthService(
                 UserName = dto.Email,
                 Email = dto.Email,
                 FullName = dto.FullName,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
             };
 
             var result = await _userManager.CreateAsync(user, dto.Password);
@@ -223,7 +225,6 @@ public class AuthService(
     }
 
     // ─── Private helpers ────────────────────────
-
     private ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
     {
         var tokenValidationParameters = new TokenValidationParameters

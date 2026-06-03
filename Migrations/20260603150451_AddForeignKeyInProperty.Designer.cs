@@ -12,8 +12,8 @@ using com.zameen.Data;
 namespace com.zameen.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260601124757_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260603150451_AddForeignKeyInProperty")]
+    partial class AddForeignKeyInProperty
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -324,7 +324,7 @@ namespace com.zameen.Migrations
 
                     b.Property<string>("AgentId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal>("AreaSize")
                         .HasPrecision(18, 2)
@@ -377,6 +377,8 @@ namespace com.zameen.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AgentId");
 
                     b.ToTable("Properties");
                 });
@@ -484,6 +486,17 @@ namespace com.zameen.Migrations
                         .IsRequired();
 
                     b.Navigation("Property");
+                });
+
+            modelBuilder.Entity("com.zameen.Models.Property", b =>
+                {
+                    b.HasOne("com.zameen.Models.Agent", "Agent")
+                        .WithMany()
+                        .HasForeignKey("AgentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Agent");
                 });
 
             modelBuilder.Entity("com.zameen.Models.RefreshToken", b =>

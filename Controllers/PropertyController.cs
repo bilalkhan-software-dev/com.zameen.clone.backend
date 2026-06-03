@@ -29,6 +29,16 @@ public class PropertyController(IPropertyService _propertyService) : ControllerB
         return Ok(result);
     }
 
+//     [HttpGet("locations")]
+// [AllowAnonymous]
+// public async Task<IActionResult> GetLocations(
+//     [FromQuery] string? city,
+//     [FromQuery] string? search)    // <-- new parameter
+// {
+//     var locations = await _propertyService.GetDistinctAddressesAsync(city, search);
+//     return Ok(locations);
+// }
+
     // Agent operations
     [HttpPost]
     [Authorize(Policy = "AgentOnly")]

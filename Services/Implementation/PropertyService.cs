@@ -4,7 +4,6 @@ using com.zameen.Models;
 using com.zameen.Models.Dto.Request;
 using com.zameen.Models.Dto.Response;
 using com.zameen.Models.Enums;
-using com.zameen.Repositories.Implementation;
 using com.zameen.Repositories.Interfaces;
 using com.zameen.Services.Interfaces;
 
@@ -37,13 +36,6 @@ public class PropertyService(
         var paged = await _propertyRepo.SearchAsync(filters);
         var items = _mapper.Map<IEnumerable<PropertyResponse>>(paged.Items);
 
-        // Enrich with agent name
-        foreach (var item in items)
-        {
-            var agent = await _agentRepo.GetByIdAsync(item.AgentId);
-            item.AgentName = agent?.AgencyName ?? "";
-        }
-
         return ApiResponse<PagedResult<PropertyResponse>>.Ok(
             new PagedResult<PropertyResponse>
             {
@@ -58,13 +50,11 @@ public class PropertyService(
     public async Task<ApiResponse<PropertyResponse>> GetByIdAsync(int id)
     {
         _logger.LogDebug("Fetching property ID {PropertyId}", id);
-        var property = await _propertyRepo.GetByIdAsync(id);
+        var property = await _propertyRepo.GetPropertyDetailById(id);
         if (property == null || !property.IsActive)
             throw new ResourceNotFoundException($"Property with ID {id} not found.");
 
-        var agent = await _agentRepo.GetByIdAsync(property.AgentId);
         var response = _mapper.Map<PropertyResponse>(property);
-        response.AgentName = agent?.AgencyName ?? "";
         return ApiResponse<PropertyResponse>.Ok(response);
     }
 
@@ -83,14 +73,13 @@ public class PropertyService(
             throw new ResourceAlreadyExistsException("A property with this title already exists.");
 
         var property = _mapper.Map<Property>(request);
-        property.AgentId = agent.Id; // ← fix here
+        // property.AgentId = agent.Id;
+        property.Agent = agent;
         property.PropertyPics = request.PropertyPics ?? [];
         property.Status = PropertyStatus.PENDING; // set a default status
         property.IsActive = true;
 
-        await _propertyRepo.AddAsync(property);
-        // AddAsync already calls SaveChangesAsync, but we can call again just in case
-        // await _propertyRepo.SaveChangesAsync();
+        Property saved = await _propertyRepo.AddAsync(property);
 
         _logger.LogInformation(
             "Property {PropertyId} created by agent {AgentId}",
@@ -98,8 +87,8 @@ public class PropertyService(
             agent.Id
         );
 
-        var response = _mapper.Map<PropertyResponse>(property);
-        response.AgentName = agent.AgencyName;
+        var response = _mapper.Map<PropertyResponse>(saved);
+        // response.AgentName = agent.AgencyName;
         return ApiResponse<PropertyResponse>.Ok(response, "Property created.");
     }
 
@@ -115,8 +104,9 @@ public class PropertyService(
         if (property == null || !property.IsActive)
             throw new ResourceNotFoundException("Property not found.");
 
+        // Check if agent is exist in database or property created by him
         var agent = await _agentRepo.GetByUserIdAsync(agentUserId);
-        if (agent == null || property.AgentId != agent.Id)
+        if (agent == null || property.Agent.Id != agent.Id)
             return ApiResponse<PropertyResponse>.Fail(
                 "You don't have permission to update this property."
             );
@@ -162,7 +152,7 @@ public class PropertyService(
         await _propertyRepo.SaveChangesAsync();
 
         var response = _mapper.Map<PropertyResponse>(property);
-        response.AgentName = agent.AgencyName;
+        // response.AgentName = agent.AgencyName;
         _logger.LogInformation("Property {PropertyId} updated", id);
         return ApiResponse<PropertyResponse>.Ok(response, "Property updated.");
     }
@@ -176,7 +166,7 @@ public class PropertyService(
             throw new ResourceNotFoundException("Property not found.");
 
         var agent = await _agentRepo.GetByUserIdAsync(agentUserId);
-        if (agent == null || property.AgentId != agent.Id)
+        if (agent == null || property.Agent.Id != agent.Id)
             return ApiResponse.Fail("You do not have permission to delete this property.");
 
         property.IsActive = false;
@@ -199,10 +189,8 @@ public class PropertyService(
         if (agent == null)
             throw new ResourceNotFoundException("Agent not found.");
 
-        var paged = await _propertyRepo.GetPropertiesByAgentAsync(agentUserId, page, size);
+        var paged = await _propertyRepo.GetPropertiesByAgentAsync(agent.Id, page, size);
         var dtos = _mapper.Map<IEnumerable<PropertyResponse>>(paged.Items);
-        foreach (var dto in dtos)
-            dto.AgentName = agent.AgencyName;
 
         return ApiResponse<PagedResult<PropertyResponse>>.Ok(
             new PagedResult<PropertyResponse>
@@ -224,7 +212,7 @@ public class PropertyService(
             throw new ResourceNotFoundException("Property not found.");
 
         var agent = await _agentRepo.GetByUserIdAsync(agentUserId);
-        if (agent == null || property.AgentId != agent.Id)
+        if (agent == null || property.Agent.Id != agent.Id)
             return ApiResponse.Fail("Permission denied.");
 
         property.IsActive = !property.IsActive;

@@ -17,8 +17,12 @@ public class PropertyRepository(ApplicationDbContext context)
 
         if (!string.IsNullOrWhiteSpace(filters.City))
             query = query.Where(p => p.City == filters.City);
+        if (!string.IsNullOrWhiteSpace(filters.Address))
+            query = query.Where(p => p.Address.Contains(filters.Address));
         if (filters.PropertyType.HasValue)
             query = query.Where(p => p.PropertyType == filters.PropertyType.Value);
+        if (filters.AreaUnit.HasValue)
+            query = query.Where(p => p.AreaUnit == filters.AreaUnit.Value);
         if (filters.Status.HasValue)
             query = query.Where(p => p.Status == filters.Status.Value);
         if (filters.MinPrice.HasValue)
@@ -61,6 +65,7 @@ public class PropertyRepository(ApplicationDbContext context)
         var items = await orderedQuery
             .Skip((filters.Page - 1) * filters.PageSize)
             .Take(filters.PageSize)
+            .Include(a => a.Agent)
             .ToListAsync();
 
         return new PagedResult<Property>
@@ -101,5 +106,13 @@ public class PropertyRepository(ApplicationDbContext context)
         if (excludeId.HasValue)
             query = query.Where(p => p.Id != excludeId.Value);
         return await query.AnyAsync();
+    }
+
+    public async Task<Property?> GetPropertyDetailById(int propertyId)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .Include(p => p.Agent)
+            .FirstOrDefaultAsync(p => p.Id == propertyId);
     }
 }

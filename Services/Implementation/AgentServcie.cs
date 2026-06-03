@@ -83,7 +83,14 @@ public class AgentService(
         var agent =
             await _agentRepo.GetByUserIdAsync(userId)
             ?? throw new ResourceNotFoundException("Agent profile not found.");
-        _mapper.Map(request, agent);
+
+        if (request.AgencyName is not null)
+            agent.AgencyName = request.AgencyName;
+        if (request.Bio is not null)
+            agent.Bio = request.Bio;
+        if (request.ProfilePic is not null)
+            agent.ProfilePic = request.ProfilePic;
+
         agent.UpdatedAt = DateTime.UtcNow;
         _agentRepo.Update(agent);
         await _agentRepo.SaveChangesAsync();

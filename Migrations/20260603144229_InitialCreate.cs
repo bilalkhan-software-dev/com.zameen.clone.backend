@@ -78,7 +78,7 @@ namespace com.zameen.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    AgentId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AgentId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PropertyPics = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -98,6 +98,12 @@ namespace com.zameen.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Properties", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Properties_Agents_AgentId",
+                        column: x => x.AgentId,
+                        principalTable: "Agents",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -302,6 +308,11 @@ namespace com.zameen.Migrations
                 column: "PropertyId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Properties_AgentId",
+                table: "Properties",
+                column: "AgentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RefreshTokens_ApplicationUserId",
                 table: "RefreshTokens",
                 column: "ApplicationUserId");
@@ -310,9 +321,6 @@ namespace com.zameen.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Agents");
-
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -342,6 +350,9 @@ namespace com.zameen.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Agents");
         }
     }
 }

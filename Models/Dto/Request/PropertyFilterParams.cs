@@ -9,8 +9,11 @@ namespace com.zameen.Models.Dto.Request;
 public class PropertyFilterParams
 {
     public string? City { get; set; }
+    public string? Address { get; set; }
     public PropertyType? PropertyType { get; set; }
     public PropertyStatus? Status { get; set; }
+
+    public AreaUnit? AreaUnit { get; set; }
     public decimal? MinPrice { get; set; }
     public decimal? MaxPrice { get; set; }
     public int? MinBedrooms { get; set; }

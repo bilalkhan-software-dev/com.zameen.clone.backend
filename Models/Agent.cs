@@ -1,7 +1,7 @@
 ﻿using com.zameen.Models.Enums;
 
-namespace com.zameen.Models
-{
+namespace com.zameen.Models;
+
     public class Agent : AbstractEntity
     {
         public string Id { get; set; } = Guid.NewGuid().ToString();
@@ -16,4 +16,4 @@ namespace com.zameen.Models
 
         public string? Bio { get; set; }
     }
-}
+

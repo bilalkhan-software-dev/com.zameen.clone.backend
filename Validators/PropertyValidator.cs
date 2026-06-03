@@ -22,9 +22,14 @@ public class PropertyValidator : AbstractValidator<CreatePropertyRequest>
         RuleFor(x => x.AreaUnit).IsInEnum().WithMessage("Invalid area unit");
 
         RuleFor(x => x.PropertyType).IsInEnum().WithMessage("Invalid property type");
+        RuleFor(x => x.Bedrooms)
+            .NotNull()
+            .GreaterThanOrEqualTo(0)
+            .WithMessage("Bedrooms cannot be negative.");
 
-        RuleFor(x => x.Bedrooms).GreaterThanOrEqualTo(0);
-
-        RuleFor(x => x.Bathrooms).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.Bathrooms)
+            .NotNull()
+            .GreaterThanOrEqualTo(0)
+            .WithMessage("Bathrooms cannot be negative.");
     }
 }
