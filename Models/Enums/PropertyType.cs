@@ -6,5 +6,8 @@
         FLAT,
         COMMERCIAL,
         SHOP,
+        STUDIO,
+        PLOT,
+        FACTORY,
     }
 }

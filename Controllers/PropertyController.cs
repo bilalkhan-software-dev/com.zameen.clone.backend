@@ -29,15 +29,22 @@ public class PropertyController(IPropertyService _propertyService) : ControllerB
         return Ok(result);
     }
 
-//     [HttpGet("locations")]
-// [AllowAnonymous]
-// public async Task<IActionResult> GetLocations(
-//     [FromQuery] string? city,
-//     [FromQuery] string? search)    // <-- new parameter
-// {
-//     var locations = await _propertyService.GetDistinctAddressesAsync(city, search);
-//     return Ok(locations);
-// }
+    [HttpGet("locations")]
+    public async Task<ActionResult> GetLocationSuggestions(
+        [FromQuery] string city,
+        [FromQuery] string searchTerm,
+        [FromQuery] int page = 1,
+        [FromQuery] int size = 10
+    )
+    {
+        var result = await _propertyService.GetLocationSuggestionsByCity(
+            city,
+            searchTerm,
+            page,
+            size
+        );
+        return Ok(result);
+    }
 
     // Agent operations
     [HttpPost]

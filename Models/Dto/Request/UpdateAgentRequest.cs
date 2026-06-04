@@ -5,6 +5,7 @@ public class UpdateAgentRequest
     public string? AgencyName { get; set; }
 
     public string? ProfilePic { get; set; }
+    public string? ContactNumber { get; set; }
 
     public string? Bio { get; set; }
 }

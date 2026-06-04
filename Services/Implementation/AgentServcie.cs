@@ -31,6 +31,7 @@ public class AgentService(
             UserId = userId,
             AgencyName = request.AgencyName!,
             Bio = request.Bio,
+            ContactNumber = request.ContactNumber!,
             AccountStatus = AccountStatus.PENDING,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
@@ -88,6 +89,8 @@ public class AgentService(
             agent.AgencyName = request.AgencyName;
         if (request.Bio is not null)
             agent.Bio = request.Bio;
+        if (request.ContactNumber is not null)
+            agent.ContactNumber = request.ContactNumber;
         if (request.ProfilePic is not null)
             agent.ProfilePic = request.ProfilePic;
 
