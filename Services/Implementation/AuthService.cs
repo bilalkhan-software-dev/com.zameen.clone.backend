@@ -70,6 +70,7 @@ public class AuthService(
                     AgencyName = dto.AgencyName ?? "Unknown Agency",
                     Bio = dto.Bio,
                     ProfilePic = dto.ProfilePic ?? "",
+                    ContactNumber = dto.ContactNumber!,
                 };
 
                 // Directly add to DbContext (no SaveChangesAsync here)

@@ -12,8 +12,8 @@ using com.zameen.Data;
 namespace com.zameen.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260603144229_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260604192537_AddSearchLogs")]
+    partial class AddSearchLogs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -172,6 +172,10 @@ namespace com.zameen.Migrations
                     b.Property<string>("Bio")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ContactNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -326,12 +330,13 @@ namespace com.zameen.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("AmenitiesJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal>("AreaSize")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("AreaUnit")
-                        .HasColumnType("int");
 
                     b.Property<int>("Bathrooms")
                         .HasColumnType("int");
@@ -341,7 +346,7 @@ namespace com.zameen.Migrations
 
                     b.Property<string>("City")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -353,6 +358,18 @@ namespace com.zameen.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<decimal>("Latitude")
+                        .HasPrecision(18, 7)
+                        .HasColumnType("decimal(18,7)");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<decimal>("Longitude")
+                        .HasPrecision(18, 7)
+                        .HasColumnType("decimal(18,7)");
+
                     b.Property<decimal>("Price")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -360,6 +377,9 @@ namespace com.zameen.Migrations
                     b.PrimitiveCollection<string>("PropertyPics")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PropertyPurpose")
+                        .HasColumnType("int");
 
                     b.Property<string>("PropertyType")
                         .IsRequired()
@@ -379,6 +399,16 @@ namespace com.zameen.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AgentId");
+
+                    b.HasIndex("City")
+                        .HasDatabaseName("IX_Property_City");
+
+                    b.HasIndex("Location")
+                        .HasDatabaseName("IX_Property_Location");
+
+                    b.HasIndex("City", "Location")
+                        .HasDatabaseName("IX_Property_City_Location_Active")
+                        .HasFilter("[IsActive] = 1 AND [Location] IS NOT NULL");
 
                     b.ToTable("Properties");
                 });
@@ -424,6 +454,30 @@ namespace com.zameen.Migrations
                     b.HasIndex("ApplicationUserId");
 
                     b.ToTable("RefreshTokens");
+                });
+
+            modelBuilder.Entity("com.zameen.Models.SearchLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("SearchedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SearchLogs");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>

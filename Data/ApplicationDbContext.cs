@@ -11,6 +11,7 @@ namespace com.zameen.Data
         public DbSet<Property> Properties => Set<Property>();
         public DbSet<Agent> Agents => Set<Agent>();
         public DbSet<Enquiry> Enquiries => Set<Enquiry>();
+        public DbSet<SearchLog> SearchLogs => Set<SearchLog>();
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -27,6 +28,21 @@ namespace com.zameen.Data
             builder.Entity<Property>().Property(p => p.Price).HasPrecision(18, 2);
 
             builder.Entity<Property>().Property(p => p.AreaSize).HasPrecision(18, 2);
+            builder.Entity<Property>().Property(p => p.Longitude).HasPrecision(18, 7);
+            builder.Entity<Property>().Property(p => p.Latitude).HasPrecision(18, 7);
+
+            builder.Entity<Property>().HasIndex(p => p.City).HasDatabaseName("IX_Property_City");
+
+            builder
+                .Entity<Property>()
+                .HasIndex(p => new { p.City, p.Location })
+                .HasFilter("[IsActive] = 1 AND [Location] IS NOT NULL")
+                .HasDatabaseName("IX_Property_City_Location_Active");
+
+            builder
+                .Entity<Property>()
+                .HasIndex(p => p.Location)
+                .HasDatabaseName("IX_Property_Location");
 
             builder
                 .Entity<ApplicationUser>()

@@ -37,4 +37,10 @@ public interface IPropertyService
 
     Task<ApiResponse> ToggleActiveAsync(int id, string agentUserId);
     Task<ApiResponse> UpdatePropertyStatus(int id, PropertyStatus propertyStatus);
+    Task<ApiResponse<PagedResult<string>>> GetLocationSuggestionsByCity(
+        string city,
+        string searchTerm,
+        int page,
+        int size
+    );
 }

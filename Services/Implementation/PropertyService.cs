@@ -73,11 +73,13 @@ public class PropertyService(
             throw new ResourceAlreadyExistsException("A property with this title already exists.");
 
         var property = _mapper.Map<Property>(request);
-        // property.AgentId = agent.Id;
+        property.AgentId = agent.Id;
         property.Agent = agent;
         property.PropertyPics = request.PropertyPics ?? [];
-        property.Status = PropertyStatus.PENDING; // set a default status
-        property.IsActive = true;
+        property.Latitude = request.Latitude;
+        property.Longitude = request.Longitude;
+        property.Location = request.Location;
+        property.PropertyPurpose = request.PropertyPurpose;
 
         Property saved = await _propertyRepo.AddAsync(property);
 
@@ -88,7 +90,6 @@ public class PropertyService(
         );
 
         var response = _mapper.Map<PropertyResponse>(saved);
-        // response.AgentName = agent.AgencyName;
         return ApiResponse<PropertyResponse>.Ok(response, "Property created.");
     }
 
@@ -138,10 +139,14 @@ public class PropertyService(
             property.Bathrooms = request.Bathrooms.Value;
         if (request.AreaSize.HasValue)
             property.AreaSize = request.AreaSize.Value;
-        if (request.AreaUnit.HasValue)
-            property.AreaUnit = request.AreaUnit.Value;
+        if (request.PropertyPurpose.HasValue)
+            property.PropertyPurpose = request.PropertyPurpose.Value;
         if (request.PropertyType.HasValue)
             property.PropertyType = request.PropertyType.Value;
+        if (request.Latitude.HasValue)
+            property.Latitude = request.Latitude.Value;
+        if (request.Longitude.HasValue)
+            property.Longitude = request.Longitude.Value;
         if (request.PropertyPics != null && request.PropertyPics.Count > 0)
         {
             property.PropertyPics = request.PropertyPics;
@@ -261,5 +266,22 @@ public class PropertyService(
         _propertyRepo.Update(property);
         await _propertyRepo.SaveChangesAsync();
         return ApiResponse.Ok($"Property with status {propertyStatus} update successfully.");
+    }
+
+    public async Task<ApiResponse<PagedResult<string>>> GetLocationSuggestionsByCity(
+        string city,
+        string searchTerm,
+        int page,
+        int size
+    )
+    {
+        var paged = await _propertyRepo.GetLocationSuggestionsByCityAsync(
+            city,
+            searchTerm,
+            page,
+            size
+        );
+
+        return ApiResponse<PagedResult<string>>.Ok(paged);
     }
 }

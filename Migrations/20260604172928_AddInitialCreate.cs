@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace com.zameen.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class AddInitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -83,15 +83,19 @@ namespace com.zameen.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PropertyPics = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    City = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    City = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Location = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Bedrooms = table.Column<int>(type: "int", nullable: false),
                     Bathrooms = table.Column<int>(type: "int", nullable: false),
                     AreaSize = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    AreaUnit = table.Column<int>(type: "int", nullable: false),
+                    Latitude = table.Column<decimal>(type: "decimal(18,7)", precision: 18, scale: 7, nullable: false),
+                    Longitude = table.Column<decimal>(type: "decimal(18,7)", precision: 18, scale: 7, nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PropertyType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PropertyPurpose = table.Column<int>(type: "int", nullable: false),
+                    AmenitiesJson = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -311,6 +315,22 @@ namespace com.zameen.Migrations
                 name: "IX_Properties_AgentId",
                 table: "Properties",
                 column: "AgentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Property_City",
+                table: "Properties",
+                column: "City");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Property_City_Location_Active",
+                table: "Properties",
+                columns: new[] { "City", "Location" },
+                filter: "[IsActive] = 1 AND [Location] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Property_Location",
+                table: "Properties",
+                column: "Location");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RefreshTokens_ApplicationUserId",

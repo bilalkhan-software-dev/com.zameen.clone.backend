@@ -48,9 +48,18 @@ namespace com.zameen.Extensions
                     };
                 });
 
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
             // Database
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"))
+                options.UseSqlServer(
+                    connectionString,
+                    sqlOptions =>
+                        sqlOptions.EnableRetryOnFailure(
+                            maxRetryCount: 5,
+                            maxRetryDelay: TimeSpan.FromSeconds(30),
+                            errorNumbersToAdd: null
+                        )
+                )
             );
 
             // Identity
@@ -129,6 +138,9 @@ namespace com.zameen.Extensions
             services.AddScoped<IAgentRepository, AgentRepository>();
             services.AddScoped<IPropertyRepository, PropertyRepository>();
             services.AddScoped<IEnquiryRepository, EnquiryRepository>();
+            services.AddScoped<ISearchLogRepository, SearchLogRepository>();
+
+            services.AddMemoryCache();
 
             // Application services
             services.AddScoped<IAuthService, AuthService>();
@@ -136,6 +148,7 @@ namespace com.zameen.Extensions
             services.AddScoped<IAgentService, AgentService>();
             services.AddScoped<IPropertyService, PropertyService>();
             services.AddScoped<IEnquiryService, EnquiryService>();
+            services.AddScoped<ITrendingService, TrendingService>();
 
             services.AddScoped<JwtTokenService>();
 

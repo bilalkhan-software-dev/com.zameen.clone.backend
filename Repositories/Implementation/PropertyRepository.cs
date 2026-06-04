@@ -2,6 +2,7 @@ using com.zameen.Data;
 using com.zameen.Models;
 using com.zameen.Models.Dto.Request;
 using com.zameen.Models.Dto.Response;
+using com.zameen.Models.Enums;
 using com.zameen.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,16 +14,21 @@ public class PropertyRepository(ApplicationDbContext context)
 {
     public async Task<PagedResult<Property>> SearchAsync(PropertyFilterParams filters)
     {
-        var query = _dbSet.AsQueryable().AsNoTracking().Where(p => p.IsActive); // only active properties by default
+        var query = _dbSet
+            .AsQueryable()
+            .AsNoTracking()
+            .Where(p =>
+                p.IsActive
+                && p.Status != PropertyStatus.PENDING
+                && p.Status != PropertyStatus.REJECTED
+            );
 
         if (!string.IsNullOrWhiteSpace(filters.City))
             query = query.Where(p => p.City == filters.City);
-        if (!string.IsNullOrWhiteSpace(filters.Address))
-            query = query.Where(p => p.Address.Contains(filters.Address));
+        if (!string.IsNullOrWhiteSpace(filters.Location))
+            query = query.Where(p => p.Location == filters.Location);
         if (filters.PropertyType.HasValue)
             query = query.Where(p => p.PropertyType == filters.PropertyType.Value);
-        if (filters.AreaUnit.HasValue)
-            query = query.Where(p => p.AreaUnit == filters.AreaUnit.Value);
         if (filters.Status.HasValue)
             query = query.Where(p => p.Status == filters.Status.Value);
         if (filters.MinPrice.HasValue)
@@ -115,4 +121,41 @@ public class PropertyRepository(ApplicationDbContext context)
             .Include(p => p.Agent)
             .FirstOrDefaultAsync(p => p.Id == propertyId);
     }
+
+    public async Task<PagedResult<string>> GetLocationSuggestionsByCityAsync(
+        string city,
+        string searchTerm,
+        int page,
+        int size
+    )
+    {
+        var query = _dbSet
+            .AsNoTracking()
+            .Where(p => p.City == city && p.IsActive && !string.IsNullOrWhiteSpace(p.Location))
+            .Select(p => p.Location)
+            .Distinct();
+
+        // Apply search filter if provided
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.Trim();
+            query = query.Where(l => l.Contains(term, StringComparison.OrdinalIgnoreCase));
+        }
+
+        int total = await query.CountAsync();
+        var items = await query
+            .OrderBy(l => l) // alphabetical
+            .Skip((page - 1) * size)
+            .Take(size)
+            .ToListAsync();
+
+        return new PagedResult<string>
+        {
+            Items = items,
+            TotalCount = total,
+            Page = page,
+            PageSize = size,
+        };
+    }
+    public IQueryable<Property> GetQueryable() => _dbSet.AsQueryable();
 }

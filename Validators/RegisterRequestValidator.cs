@@ -1,45 +1,47 @@
-// Validators/RegisterRequestValidator.cs
 using com.zameen.Models.Dto.Request;
 using FluentValidation;
 
-namespace com.zameen.Validators
+namespace com.zameen.Validators;
+
+public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
 {
-    public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
+    public RegisterRequestValidator()
     {
-        public RegisterRequestValidator()
-        {
-            RuleFor(x => x.Email)
-                .NotEmpty()
-                .EmailAddress()
-                .WithMessage("A valid email address is required.");
+        RuleFor(x => x.Email)
+            .NotEmpty()
+            .EmailAddress()
+            .WithMessage("A valid email address is required.");
 
-            RuleFor(x => x.Password)
-                .NotEmpty()
-                .MinimumLength(6)
-                .WithMessage("Password must be at least 6 characters.");
+        RuleFor(x => x.Password)
+            .NotEmpty()
+            .MinimumLength(6)
+            .WithMessage("Password must be at least 6 characters.");
 
-            RuleFor(x => x.FullName)
-                .NotEmpty()
-                .MaximumLength(100)
-                .WithMessage("Full name is required and must not exceed 100 characters.");
+        RuleFor(x => x.FullName)
+            .NotEmpty()
+            .MaximumLength(100)
+            .WithMessage("Full name is required and must not exceed 100 characters.");
 
-            // If registering as an agency, AgencyName becomes required
-            When(
-                x => x.IsAgency,
-                () =>
-                {
-                    RuleFor(x => x.AgencyName)
-                        .NotEmpty()
-                        .MaximumLength(200)
-                        .WithMessage("Agency name is required when registering as an agency.");
-                }
-            );
+        // If registering as an agency, AgencyName becomes required
+        When(
+            x => x.IsAgency,
+            () =>
+            {
+                RuleFor(x => x.AgencyName)
+                    .NotEmpty()
+                    .MaximumLength(200)
+                    .WithMessage("Agency name is required when registering as an agency.");
 
-            // Bio is optional, but if provided, limit length
-            RuleFor(x => x.Bio)
-                .MaximumLength(500)
-                .When(x => !string.IsNullOrEmpty(x.Bio))
-                .WithMessage("Bio must not exceed 500 characters.");
-        }
+                RuleFor(x => x.ContactNumber)
+                    .NotEmpty()
+                    .MaximumLength(11)
+                    .WithMessage("Contact Number is required when registering as an agency.");
+
+                RuleFor(x => x.Bio)
+                    .NotEmpty()
+                    .MaximumLength(200)
+                    .WithMessage("Bio is required when registering as an agency.");
+            }
+        );
     }
 }

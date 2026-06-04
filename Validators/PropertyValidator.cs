@@ -19,8 +19,6 @@ public class PropertyValidator : AbstractValidator<CreatePropertyRequest>
 
         RuleFor(x => x.AreaSize).GreaterThan(0).WithMessage("Area Size must be greater than 0");
 
-        RuleFor(x => x.AreaUnit).IsInEnum().WithMessage("Invalid area unit");
-
         RuleFor(x => x.PropertyType).IsInEnum().WithMessage("Invalid property type");
         RuleFor(x => x.Bedrooms)
             .NotNull()
