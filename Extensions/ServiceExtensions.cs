@@ -138,6 +138,9 @@ namespace com.zameen.Extensions
             services.AddScoped<IAgentRepository, AgentRepository>();
             services.AddScoped<IPropertyRepository, PropertyRepository>();
             services.AddScoped<IEnquiryRepository, EnquiryRepository>();
+            services.AddScoped<ISearchLogRepository, SearchLogRepository>();
+
+            services.AddMemoryCache();
 
             // Application services
             services.AddScoped<IAuthService, AuthService>();
@@ -145,6 +148,7 @@ namespace com.zameen.Extensions
             services.AddScoped<IAgentService, AgentService>();
             services.AddScoped<IPropertyService, PropertyService>();
             services.AddScoped<IEnquiryService, EnquiryService>();
+            services.AddScoped<ITrendingService, TrendingService>();
 
             services.AddScoped<JwtTokenService>();
 

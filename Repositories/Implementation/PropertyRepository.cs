@@ -157,4 +157,5 @@ public class PropertyRepository(ApplicationDbContext context)
             PageSize = size,
         };
     }
+    public IQueryable<Property> GetQueryable() => _dbSet.AsQueryable();
 }

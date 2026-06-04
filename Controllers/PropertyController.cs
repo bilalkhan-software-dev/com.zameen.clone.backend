@@ -8,7 +8,10 @@ namespace com.zameen.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class PropertyController(IPropertyService _propertyService) : ControllerBase
+public class PropertyController(
+    IPropertyService _propertyService,
+    ITrendingService _trendingService
+) : ControllerBase
 {
     private string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
@@ -30,6 +33,7 @@ public class PropertyController(IPropertyService _propertyService) : ControllerB
     }
 
     [HttpGet("locations")]
+    [AllowAnonymous]
     public async Task<ActionResult> GetLocationSuggestions(
         [FromQuery] string city,
         [FromQuery] string searchTerm,
@@ -43,6 +47,22 @@ public class PropertyController(IPropertyService _propertyService) : ControllerB
             page,
             size
         );
+        return Ok(result);
+    }
+
+    [HttpGet("trending/locations")]
+    [AllowAnonymous]
+    public async Task<ActionResult> GetTrendingLocations([FromQuery] int top = 10)
+    {
+        var result = await _trendingService.GetTrendingLocationsAsync(top);
+        return Ok(result);
+    }
+
+    [HttpGet("trending")]
+    [AllowAnonymous]
+    public async Task<ActionResult> GetTrending([FromQuery] int count = 6)
+    {
+        var result = await _trendingService.GetTrendingPropertiesAsync(count);
         return Ok(result);
     }
 

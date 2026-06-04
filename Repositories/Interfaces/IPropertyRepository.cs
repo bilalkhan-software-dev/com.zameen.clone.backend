@@ -16,4 +16,6 @@ public interface IPropertyRepository : IGenericRepository<Property, int>
     );
     Task<Property?> GetPropertyDetailById(int propertyId);
     Task<bool> ExistsByTitleAsync(string title, int? excludeId = null);
+
+    IQueryable<Property> GetQueryable();
 }
