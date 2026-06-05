@@ -19,4 +19,5 @@ public class UpdatePropertyRequest
     public PropertyPurpose? PropertyPurpose { get; set; }
 
     public List<string>? PropertyPics { get; set; }
+    public Dictionary<string, object>? Amenities { get; set; }
 }

@@ -9,6 +9,7 @@ public class AgentResponse
     public string AgencyName { get; set; } = string.Empty;
     public string? ProfilePic { get; set; }
     public string? ContactNumber { get; set; } = string.Empty;
+    public string? ContactEmail { get; set; } = string.Empty;
     public AccountStatus? AccountStatus { get; set; }
     public string? Bio { get; set; }
 }

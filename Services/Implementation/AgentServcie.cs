@@ -87,10 +87,16 @@ public class AgentService(
 
         if (request.AgencyName is not null)
             agent.AgencyName = request.AgencyName;
+
         if (request.Bio is not null)
             agent.Bio = request.Bio;
+
         if (request.ContactNumber is not null)
             agent.ContactNumber = request.ContactNumber;
+
+        if (request.ContactEmail is not null)
+            agent.ContactEmail = request.ContactEmail;
+
         if (request.ProfilePic is not null)
             agent.ProfilePic = request.ProfilePic;
 

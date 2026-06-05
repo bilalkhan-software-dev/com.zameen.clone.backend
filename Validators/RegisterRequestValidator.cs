@@ -34,13 +34,18 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
 
                 RuleFor(x => x.ContactNumber)
                     .NotEmpty()
-                    .MaximumLength(11)
                     .WithMessage("Contact Number is required when registering as an agency.");
 
                 RuleFor(x => x.Bio)
                     .NotEmpty()
                     .MaximumLength(200)
                     .WithMessage("Bio is required when registering as an agency.");
+
+                RuleFor(x => x.ContactEmail)
+                    .NotEmpty()
+                    .WithMessage("Contact Email is required when registering as an agency.")
+                    .EmailAddress()
+                    .WithMessage("Invalid email address");
             }
         );
     }

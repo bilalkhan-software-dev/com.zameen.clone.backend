@@ -12,6 +12,8 @@ public class PropertyResponse
     public int Bedrooms { get; set; }
     public int Bathrooms { get; set; }
     public decimal AreaSize { get; set; }
+    public decimal Latitude { get; set; }
+    public decimal Longitude { get; set; }
     public List<string> PropertyPics { get; set; } = [];
     public string PropertyType { get; set; } = string.Empty;
     public string PropertyPurpose { get; set; } = string.Empty;

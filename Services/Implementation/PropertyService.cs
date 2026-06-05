@@ -1,3 +1,4 @@
+using System.Text.Json;
 using AutoMapper;
 using com.zameen.Exceptions;
 using com.zameen.Models;
@@ -125,31 +126,48 @@ public class PropertyService(
         // Apply only the fields that are not null
         if (request.Title is not null)
             property.Title = request.Title;
+
         if (request.Description is not null)
             property.Description = request.Description;
+
         if (request.Price.HasValue)
             property.Price = request.Price.Value;
+
         if (request.City is not null)
             property.City = request.City;
+
         if (request.Address is not null)
             property.Address = request.Address;
+
         if (request.Bedrooms.HasValue)
             property.Bedrooms = request.Bedrooms.Value;
+
         if (request.Bathrooms.HasValue)
             property.Bathrooms = request.Bathrooms.Value;
+
         if (request.AreaSize.HasValue)
             property.AreaSize = request.AreaSize.Value;
+
         if (request.PropertyPurpose.HasValue)
             property.PropertyPurpose = request.PropertyPurpose.Value;
+
         if (request.PropertyType.HasValue)
             property.PropertyType = request.PropertyType.Value;
+
         if (request.Latitude.HasValue)
             property.Latitude = request.Latitude.Value;
+
         if (request.Longitude.HasValue)
             property.Longitude = request.Longitude.Value;
-        if (request.PropertyPics != null && request.PropertyPics.Count > 0)
+
+        if (request.PropertyPics != null && request.PropertyPics.Count != 0)
         {
             property.PropertyPics = request.PropertyPics;
+        }
+
+        if (request.Amenities != null && request.Amenities.Count != 0)
+        {
+            property.AmenitiesJson = JsonSerializer.Serialize(request.Amenities);
         }
 
         property.UpdatedAt = DateTime.UtcNow;

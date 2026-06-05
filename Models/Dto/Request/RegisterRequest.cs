@@ -15,5 +15,6 @@ namespace com.zameen.Models.Dto.Request
 
         public string? Bio { get; set; }
         public string? ContactNumber { get; set; }
+        public string? ContactEmail { get; set; }
     }
 }
