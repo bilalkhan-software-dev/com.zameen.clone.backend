@@ -11,6 +11,7 @@ namespace com.zameen.Controllers;
 public class EnquiryController(IEnquiryService _enquiryService) : ControllerBase
 {
     [HttpPost]
+    [AllowAnonymous]
     public async Task<IActionResult> Send([FromBody] CreateEnquiryRequest request)
     {
         var result = await _enquiryService.SendEnquiryAsync(request);
@@ -20,7 +21,7 @@ public class EnquiryController(IEnquiryService _enquiryService) : ControllerBase
     [HttpGet("property/{propertyId}")]
     [Authorize(Policy = "AdminAndAgentOnly")]
     public async Task<IActionResult> GetForProperty(
-        int propertyId,
+        [FromRoute] int propertyId,
         [FromQuery] int page = 1,
         [FromQuery] int size = 10
     )
@@ -29,11 +30,32 @@ public class EnquiryController(IEnquiryService _enquiryService) : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("agent/{agentId}")]
+    [Authorize(Policy = "AgentOnly")]
+    public async Task<IActionResult> GetAgentEnquiry(
+        [FromRoute] string agentId,
+        [FromQuery] int page = 1,
+        [FromQuery] int size = 10
+    )
+    {
+        var result = await _enquiryService.GetEnquiriesByAgentAsync(agentId, page, size);
+        return Ok(result);
+    }
+
     [HttpGet("{id}")]
     [Authorize(Policy = "AgentOnly")]
-    public async Task<IActionResult> GetById(int id)
+    public async Task<IActionResult> GetById([FromRoute] int id)
     {
         var result = await _enquiryService.GetEnquiryByIdAsync(id);
+        return Ok(result);
+    }
+
+    [HttpDelete("{id}")]
+    [Authorize(Policy = "AgentOnly")]
+    public async Task<IActionResult> Delete([FromRoute] int id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var result = await _enquiryService.DeleteEnquiryAsync(id, userId);
         return Ok(result);
     }
 }

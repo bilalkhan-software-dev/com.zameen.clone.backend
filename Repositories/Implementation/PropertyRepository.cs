@@ -170,5 +170,90 @@ public class PropertyRepository(ApplicationDbContext context)
         };
     }
 
+    // PropertyRepository.cs
+    public async Task<PagedResult<Property>> GetSimilarByLocationAsync(
+        int propertyId,
+        int page,
+        int pageSize
+    )
+    {
+        var property = await _dbSet.FindAsync(propertyId);
+        if (property == null)
+            return new PagedResult<Property>
+            {
+                Items = new List<Property>(),
+                TotalCount = 0,
+                Page = page,
+                PageSize = pageSize,
+            };
+
+        var query = _dbSet
+            .Where(p =>
+                p.Id != propertyId
+                && p.IsActive
+                && p.Status == PropertyStatus.APPROVED
+                && p.City == property.City
+                && p.Location == property.Location
+                && p.PropertyType == property.PropertyType
+            )
+            .OrderByDescending(p => p.CreatedAt); // newest first
+
+        var total = await query.CountAsync();
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Include(p => p.Agent)
+            .ToListAsync();
+
+        return new PagedResult<Property>
+        {
+            Items = items,
+            TotalCount = total,
+            Page = page,
+            PageSize = pageSize,
+        };
+    }
+
+    public async Task<PagedResult<Property>> GetSimilarByAgentAsync(
+        int propertyId,
+        int page,
+        int pageSize
+    )
+    {
+        var property = await _dbSet.FindAsync(propertyId);
+        if (property == null)
+            return new PagedResult<Property>
+            {
+                Items = new List<Property>(),
+                TotalCount = 0,
+                Page = page,
+                PageSize = pageSize,
+            };
+
+        var query = _dbSet
+            .Where(p =>
+                p.Id != propertyId
+                && p.IsActive
+                && p.Status == PropertyStatus.APPROVED
+                && p.AgentId == property.AgentId
+            )
+            .OrderByDescending(p => p.CreatedAt);
+
+        var total = await query.CountAsync();
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Include(p => p.Agent)
+            .ToListAsync();
+
+        return new PagedResult<Property>
+        {
+            Items = items,
+            TotalCount = total,
+            Page = page,
+            PageSize = pageSize,
+        };
+    }
+
     public IQueryable<Property> GetQueryable() => _dbSet.AsQueryable();
 }

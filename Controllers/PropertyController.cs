@@ -66,6 +66,30 @@ public class PropertyController(
         return Ok(result);
     }
 
+    [HttpGet("{id}/similar/location")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetSimilarByLocation(
+        int id,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 8
+    )
+    {
+        var result = await _propertyService.GetSimilarByLocationAsync(id, page, pageSize);
+        return Ok(result);
+    }
+
+    [HttpGet("{id}/similar/agent")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetSimilarByAgent(
+        int id,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 8
+    )
+    {
+        var result = await _propertyService.GetSimilarByAgentAsync(id, page, pageSize);
+        return Ok(result);
+    }
+
     // Agent operations
     [HttpPost]
     [Authorize(Policy = "AgentOnly")]

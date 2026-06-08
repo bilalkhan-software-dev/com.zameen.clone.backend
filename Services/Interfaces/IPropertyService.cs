@@ -43,4 +43,14 @@ public interface IPropertyService
         int page,
         int size
     );
+    Task<ApiResponse<PagedResult<PropertyResponse>>> GetSimilarByLocationAsync(
+        int propertyId,
+        int page = 1,
+        int pageSize = 8
+    );
+    Task<ApiResponse<PagedResult<PropertyResponse>>> GetSimilarByAgentAsync(
+        int propertyId,
+        int page = 1,
+        int pageSize = 8
+    );
 }

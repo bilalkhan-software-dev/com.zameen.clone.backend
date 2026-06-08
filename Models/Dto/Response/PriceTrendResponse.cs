@@ -1,6 +1,6 @@
 namespace com.zameen.Models.Dto.Response;
 
-public class PriceTrendResponse
+public class PriceTrendResponse : AbstractResponse
 {
     public decimal CurrentPrice { get; set; }
     public decimal PriceChange { get; set; }

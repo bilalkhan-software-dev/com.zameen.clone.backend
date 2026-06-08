@@ -6,6 +6,6 @@ public class CreateSearchLogRequest
 {
     public string Location { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
-    public PropertyType PropertyType;
-    public PropertyPurpose PropertyPurpose;
+    public PropertyType PropertyType { get; set; }
+    public PropertyPurpose PropertyPurpose { get; set; }
 }

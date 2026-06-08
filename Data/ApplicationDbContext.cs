@@ -43,9 +43,17 @@ namespace com.zameen.Data
                 .HasIndex(p => p.AgentId)
                 .HasDatabaseName("IX_Property_AgentId");
 
+            builder
+                .Entity<Enquiry>()
+                .HasIndex(p => p.AgentId)
+                .HasDatabaseName("IX_Enquiry_AgentId");
+
             builder.Entity<PriceTrend>().Property(p => p.PropertyType).HasConversion<string>();
             builder.Entity<PriceTrend>().Property(p => p.PropertyPurpose).HasConversion<string>();
             builder.Entity<PriceTrend>().Property(pt => pt.AveragePrice).HasPrecision(18, 2);
+
+            builder.Entity<SearchLog>().Property(sl => sl.PropertyType).HasConversion<string>();
+            builder.Entity<SearchLog>().Property(sl => sl.PropertyPurpose).HasConversion<string>();
 
             builder.Entity<Agent>().Property(a => a.AccountStatus).HasConversion<string>();
             builder.Entity<Agent>().HasIndex(u => u.UserId).HasDatabaseName("IX_Agent_UserId");

@@ -154,6 +154,7 @@ namespace com.zameen.Extensions
 
             services.AddScoped<JwtTokenService>();
 
+            services.AddHostedService<PriceTrendGenerationService>();
             // AutoMapper
             services.AddAutoMapper(cfg =>
             {

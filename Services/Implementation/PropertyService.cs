@@ -70,8 +70,8 @@ public class PropertyService(
         if (agent == null || agent.AccountStatus != AccountStatus.APPROVED)
             return ApiResponse<PropertyResponse>.Fail("Agent not found or not approved.");
 
-        if (await _propertyRepo.ExistsByTitleAsync(request.Title))
-            throw new ResourceAlreadyExistsException("A property with this title already exists.");
+        // if (await _propertyRepo.ExistsByTitleAsync(request.Title))
+        //     throw new ResourceAlreadyExistsException("A property with this title already exists.");
 
         var property = _mapper.Map<Property>(request);
         property.AgentId = agent.Id;
@@ -114,14 +114,14 @@ public class PropertyService(
             );
 
         // Check duplicate title only if title is being changed
-        if (!string.IsNullOrWhiteSpace(request.Title) && request.Title != property.Title)
-        {
-            bool duplicate = await _propertyRepo.ExistsByTitleAsync(request.Title, id);
-            if (duplicate)
-                throw new ResourceAlreadyExistsException(
-                    "Another property with this title already exists."
-                );
-        }
+        // if (!string.IsNullOrWhiteSpace(request.Title) && request.Title != property.Title)
+        // {
+        //     bool duplicate = await _propertyRepo.ExistsByTitleAsync(request.Title, id);
+        //     if (duplicate)
+        //         throw new ResourceAlreadyExistsException(
+        //             "Another property with this title already exists."
+        //         );
+        // }
 
         // Apply only the fields that are not null
         if (request.Title is not null)
@@ -301,5 +301,41 @@ public class PropertyService(
         );
 
         return ApiResponse<PagedResult<string>>.Ok(paged);
+    }
+
+    public async Task<ApiResponse<PagedResult<PropertyResponse>>> GetSimilarByLocationAsync(
+        int propertyId,
+        int page = 1,
+        int pageSize = 8
+    )
+    {
+        var paged = await _propertyRepo.GetSimilarByLocationAsync(propertyId, page, pageSize);
+        var dtos = _mapper.Map<IEnumerable<PropertyResponse>>(paged.Items);
+        var result = new PagedResult<PropertyResponse>
+        {
+            Items = dtos,
+            TotalCount = paged.TotalCount,
+            Page = paged.Page,
+            PageSize = paged.PageSize,
+        };
+        return ApiResponse<PagedResult<PropertyResponse>>.Ok(result);
+    }
+
+    public async Task<ApiResponse<PagedResult<PropertyResponse>>> GetSimilarByAgentAsync(
+        int propertyId,
+        int page = 1,
+        int pageSize = 8
+    )
+    {
+        var paged = await _propertyRepo.GetSimilarByAgentAsync(propertyId, page, pageSize);
+        var dtos = _mapper.Map<IEnumerable<PropertyResponse>>(paged.Items);
+        var result = new PagedResult<PropertyResponse>
+        {
+            Items = dtos,
+            TotalCount = paged.TotalCount,
+            Page = paged.Page,
+            PageSize = paged.PageSize,
+        };
+        return ApiResponse<PagedResult<PropertyResponse>>.Ok(result);
     }
 }

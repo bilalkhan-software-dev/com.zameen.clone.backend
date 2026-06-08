@@ -2,7 +2,7 @@ using com.zameen.Models.Enums;
 
 namespace com.zameen.Models.Dto.Response;
 
-public class AgentResponse
+public class AgentResponse : AbstractResponse
 {
     public string Id { get; set; } = string.Empty;
     public string UserId { get; set; } = string.Empty;

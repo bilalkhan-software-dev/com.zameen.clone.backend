@@ -7,8 +7,10 @@ namespace com.zameen.Repositories.Interfaces;
 public interface IPriceTrendRepository : IGenericRepository<PriceTrend, int>
 {
     Task<PriceTrendResponse?> GetPriceTrendAsync(
+        string city,
         string location,
         PropertyType propertyType,
+        PropertyPurpose propertyPurpose,
         string sizeRange,
         string range
     );

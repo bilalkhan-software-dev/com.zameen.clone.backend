@@ -12,8 +12,10 @@ public class PriceTrendRepository(ApplicationDbContext context)
         IPriceTrendRepository
 {
     public async Task<PriceTrendResponse?> GetPriceTrendAsync(
+        string city,
         string location,
         PropertyType propertyType,
+        PropertyPurpose propertyPurpose,
         string sizeRange,
         string range
     )
@@ -28,7 +30,9 @@ public class PriceTrendRepository(ApplicationDbContext context)
         var data = await _dbSet
             .Where(p =>
                 p.Location == location
+                && p.City == city
                 && p.PropertyType == propertyType
+                && p.PropertyPurpose == propertyPurpose
                 && p.SizeRange == sizeRange
                 && p.RecordedDate >= cutoff
             )
@@ -42,7 +46,7 @@ public class PriceTrendRepository(ApplicationDbContext context)
         var current = data.Last().Price;
         var oldest = data.First().Price;
         var change = current - oldest;
-        var percentChange = (change / oldest) * 100;
+        var percentChange = change / oldest * 100;
 
         // Optional: compute 6/12/24 months ago prices
         var now = DateTime.UtcNow;

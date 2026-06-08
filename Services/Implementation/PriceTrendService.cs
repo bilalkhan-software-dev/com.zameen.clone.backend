@@ -8,15 +8,19 @@ namespace com.zameen.Services.Implementation;
 public class PriceTrendService(IPriceTrendRepository priceTrendRepo) : IPriceTrendService
 {
     public async Task<ApiResponse<PriceTrendResponse>> GetPriceTrendForProperty(
+        string city,
         string location,
         PropertyType propertyType,
+        PropertyPurpose propertyPurpose,
         string sizeRange,
         string range
     )
     {
         var result = await priceTrendRepo.GetPriceTrendAsync(
+            city,
             location,
             propertyType,
+            propertyPurpose,
             sizeRange,
             range
         );
