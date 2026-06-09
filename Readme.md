@@ -1,57 +1,89 @@
-# PropertyHub – Zameen.com Clone (Internship Project)
+# PropertyHub Backend – ASP.NET Core Web API
 
-A full‑stack real‑estate portal built with **ASP.NET Core 10** (preview) and **Next.js 16.2.6 + MUI + TypeScript**.  
-Features JWT authentication, Google OAuth2, role‑based access (User/Agent/Admin), advanced property search with pagination, and Docker support.
+> **Internship Project** – A full‑featured real‑estate portal backend built with ASP.NET Core 10 (preview), Entity Framework Core, and JWT authentication.
 
-## ✨ Key Features
+## 📚 Features
 
-- User registration & login (JWT + refresh token rotation)
-- Google OAuth2 login (challenge flow)
-- Roles: User, Agent, Admin
-- Property CRUD (create/edit/delete/toggle active)
-- Advanced property filtering (city, price, bedrooms, area, etc.) with pagination & sorting
-- Property images (URLs stored as JSON)
-- Agent approval workflow (admin)
-- Enquiry system (public send + agent/admin view)
-- Admin user & agent management
-- Serilog logging, FluentValidation, AutoMapper, Swagger
+- **User, Agent & Admin roles** with identity management
+- **JWT authentication** with refresh token rotation
+- **Google OAuth2** login (challenge flow)
+- **Property CRUD** (create, read, update, delete, toggle active)
+- **Advanced filtering** (city, price, area, bedrooms, etc.) with pagination & sorting
+- **Agent approval** by admin
+- **Enquiry system** (public can send, agents/admins can view)
+- **Background service** for monthly price trend generation
+- **Search log** tracking for trending locations
+- **FluentValidation**, **AutoMapper**, **Serilog** logging, **Swagger** UI
 
-## 🏗 Tech Stack
+## 🛠 Tech Stack
 
-| Layer    | Technology                                                     |
-| -------- | -------------------------------------------------------------- |
-| Backend  | ASP.NET Core 10 (preview), EF Core, Identity, JWT, Swashbuckle |
-| Frontend | Next.js 16.2.6 (App Router), React 19.2.4, MUI 9.0.1, TypeScript, Axios    |
-| Database | SQL Server 2025                                                |
-| DevOps   | Docker, Docker Compose                                         |
+- ASP.NET Core 10 
+- Entity Framework Core
+- SQL Server 2025
+- JWT Bearer & Google OAuth2
+- FluentValidation, AutoMapper, Serilog
+- Docker, Docker Compose
 
----
-
-## 🚀 Getting Started (Local Development without Docker)
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- [.NET 10 SDK Preview](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
-- [Node.js 20+](https://nodejs.org/)
+- [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 - SQL Server (LocalDB, Express, or Docker container)
 
-### Backend Setup
+### 1. Clone the repository
 
 ```bash
-# 1. Clone the repo
 git clone https://github.com/bilalkhan-software-dev/com.zameen.clone.backend.git
 cd com.zameen.clone.backend
+```
 
-# 2. Set secrets (development only)
+### 2. Set user secrets (for development)
+
+```bash
 dotnet user-secrets init
 dotnet user-secrets set "Jwt:Key" "YourSuperSecretKeyAtLeast32CharactersLong!"
 dotnet user-secrets set "Authentication:Google:ClientId" "your-google-client-id"
 dotnet user-secrets set "Authentication:Google:ClientSecret" "your-google-client-secret"
+```
 
-# 3. Update connection string (appsettings.Development.json) if needed
-# 4. Apply migrations
+### 3. Configure the connection string
+
+Edit `appsettings.Development.json` and set your SQL Server connection string under `ConnectionStrings:DefaultConnection`.
+
+### 4. Apply database migrations
+
+```bash
 dotnet ef database update
+```
 
-# 5. Run the API
+### 5. Run the server
+
+```bash
 dotnet run
 ```
+
+The API will be available at `http://localhost:5118` and Swagger at `http://localhost:5118/swagger`.
+
+## 📂 Project Structure (simplified)
+
+```
+com.zameen/
+├── Controllers/          # API endpoints
+├── Data/                 # DbContext, migrations
+├── Models/               # Entities, DTOs
+├── Repositories/         # Data access layer
+├── Services/             # Business logic
+├── Middleware/            # Custom middleware (e.g. global exception handler)
+├── Validators/           # FluentValidation validators
+└── Program.cs            # App startup
+```
+
+
+## 📡 API Documentation
+
+Once running, open `/swagger` for interactive API docs.
+
+## 🤝 Contributing
+
+Pull requests are welcome. For major changes, please open an issue first.
