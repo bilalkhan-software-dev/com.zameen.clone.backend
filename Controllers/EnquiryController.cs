@@ -19,7 +19,7 @@ public class EnquiryController(IEnquiryService _enquiryService) : ControllerBase
     }
 
     [HttpGet("property/{propertyId}")]
-    [Authorize(Policy = "AdminAndAgentOnly")]
+    [Authorize(Policy = "AdminOrAgentOnly")]
     public async Task<IActionResult> GetForProperty(
         [FromRoute] int propertyId,
         [FromQuery] int page = 1,

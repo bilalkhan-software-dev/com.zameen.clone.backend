@@ -116,12 +116,8 @@ namespace com.zameen.Extensions
                 options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
                 options.AddPolicy("AgentOnly", policy => policy.RequireRole("Agent"));
                 options.AddPolicy(
-                    "AdminAndAgentOnly",
-                    policy =>
-                    {
-                        policy.RequireRole("Agent");
-                        policy.RequireRole("Admin");
-                    }
+                    "AdminOrAgentOnly",
+                    policy => policy.RequireRole("Agent", "Admin")
                 );
             });
 
