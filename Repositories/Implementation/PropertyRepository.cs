@@ -170,7 +170,6 @@ public class PropertyRepository(ApplicationDbContext context)
         };
     }
 
-    // PropertyRepository.cs
     public async Task<PagedResult<Property>> GetSimilarByLocationAsync(
         int propertyId,
         int page,
@@ -236,6 +235,7 @@ public class PropertyRepository(ApplicationDbContext context)
                 && p.IsActive
                 && p.Status == PropertyStatus.APPROVED
                 && p.AgentId == property.AgentId
+                && p.PropertyType == property.PropertyType
             )
             .OrderByDescending(p => p.CreatedAt);
 
