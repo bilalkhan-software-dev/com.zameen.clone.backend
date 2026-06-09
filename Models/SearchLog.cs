@@ -7,7 +7,7 @@ public class SearchLog
     public int Id { get; set; }
     public string Location { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
-    public PropertyType PropertyType;
-    public PropertyPurpose PropertyPurpose;
+    public PropertyType PropertyType { get; set; }
+    public PropertyPurpose PropertyPurpose { get; set; }
     public DateTime SearchedAt { get; set; } = DateTime.UtcNow;
 }

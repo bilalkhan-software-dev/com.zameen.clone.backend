@@ -31,67 +31,68 @@ public class AuthService(
         if (existingUser != null)
             throw new ResourceAlreadyExistsException("Email already registered.");
 
-        using var transaction = await _dbContext.Database.BeginTransactionAsync();
+        // using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
-        try
+        // try
+        // {
+        var user = new ApplicationUser
         {
-            var user = new ApplicationUser
+            UserName = dto.Email,
+            Email = dto.Email,
+            FullName = dto.FullName,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+        };
+
+        var result = await _userManager.CreateAsync(user, dto.Password);
+        if (!result.Succeeded)
+        {
+            _logger.LogWarning(
+                "Registration failed for {Email}: {Errors}",
+                dto.Email,
+                string.Join(", ", result.Errors.Select(e => e.Description))
+            );
+            return ApiResponse<TokenResponse>.Fail(
+                "User creation failed.",
+                result.Errors.Select(e => e.Description)
+            );
+        }
+
+        await _userManager.AddToRoleAsync(user, "User");
+
+        if (dto.IsAgency)
+        {
+            await _userManager.AddToRoleAsync(user, "Agent");
+
+            var agent = new Agent
             {
-                UserName = dto.Email,
-                Email = dto.Email,
-                FullName = dto.FullName,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
+                UserId = user.Id.ToString(),
+                AgencyName = dto.AgencyName ?? "Unknown Agency",
+                Bio = dto.Bio,
+                ProfilePic = dto.ProfilePic ?? "",
+                ContactNumber = dto.ContactNumber!,
+                ContactEmail = dto.ContactEmail!,
             };
 
-            var result = await _userManager.CreateAsync(user, dto.Password);
-            if (!result.Succeeded)
-            {
-                _logger.LogWarning(
-                    "Registration failed for {Email}: {Errors}",
-                    dto.Email,
-                    string.Join(", ", result.Errors.Select(e => e.Description))
-                );
-                return ApiResponse<TokenResponse>.Fail(
-                    "User creation failed.",
-                    result.Errors.Select(e => e.Description)
-                );
-            }
-
-            await _userManager.AddToRoleAsync(user, "User");
-
-            if (dto.IsAgency)
-            {
-                await _userManager.AddToRoleAsync(user, "Agent");
-
-                var agent = new Agent
-                {
-                    UserId = user.Id.ToString(),
-                    AgencyName = dto.AgencyName ?? "Unknown Agency",
-                    Bio = dto.Bio,
-                    ProfilePic = dto.ProfilePic ?? "",
-                    ContactNumber = dto.ContactNumber!,
-                };
-
-                // Directly add to DbContext (no SaveChangesAsync here)
-                await _dbContext.Set<Agent>().AddAsync(agent);
-            }
-
-            // At this point, both user and agent are tracked but not committed.
-            // SaveChangesAsync will persist both inside the transaction.
-            await _dbContext.SaveChangesAsync();
-
-            await transaction.CommitAsync();
-
-            var tokens = await jwtService.GenerateTokensAsync(user);
-            _logger.LogInformation("User {Email} registered successfully", dto.Email);
-            return ApiResponse<TokenResponse>.Ok(tokens, "Registration successful.");
+            // Directly add to DbContext (no SaveChangesAsync here)
+            await _dbContext.Set<Agent>().AddAsync(agent);
         }
-        catch
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }
+
+        // At this point, both user and agent are tracked but not committed.
+        // SaveChangesAsync will persist both inside the transaction.
+        await _dbContext.SaveChangesAsync();
+
+        // await transaction.CommitAsync();
+
+        var tokens = await jwtService.GenerateTokensAsync(user);
+        _logger.LogInformation("User {Email} registered successfully", dto.Email);
+        return ApiResponse<TokenResponse>.Ok(tokens, "Registration successful.");
+        // }
+        // catch
+        // {
+        //     await transaction.RollbackAsync();
+        //     throw;
+        // }
     }
 
     public async Task<ApiResponse<TokenResponse>> LoginAsync(LoginRequest dto, string? ipAddress)

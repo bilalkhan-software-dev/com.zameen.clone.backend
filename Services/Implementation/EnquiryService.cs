@@ -23,12 +23,12 @@ public class EnquiryService(
             request.PropertyId
         );
 
-        var property = await propertyRepo.GetByIdAsync(request.PropertyId);
+        var property = await propertyRepo.GetPropertyDetailById(request.PropertyId);
         if (property == null || !property.IsActive)
             throw new ResourceNotFoundException("Property not available.");
 
         var enquiry = mapper.Map<Enquiry>(request);
-        enquiry.CreatedAt = DateTime.UtcNow;
+        enquiry.AgentId = property.Agent.Id;
         await enquiryRepo.AddAsync(enquiry);
         logger.LogInformation("Enquiry created ID {EnquiryId}", enquiry.Id);
 
@@ -54,6 +54,26 @@ public class EnquiryService(
     )
     {
         var paged = await enquiryRepo.GetByPropertyIdAsync(propertyId, page, size);
+        var dtos = mapper.Map<IEnumerable<EnquiryResponse>>(paged.Items);
+
+        return ApiResponse<PagedResult<EnquiryResponse>>.Ok(
+            new PagedResult<EnquiryResponse>
+            {
+                Items = dtos,
+                TotalCount = paged.TotalCount,
+                Page = page,
+                PageSize = size,
+            }
+        );
+    }
+
+    public async Task<ApiResponse<PagedResult<EnquiryResponse>>> GetEnquiriesByAgentAsync(
+        string agentId,
+        int page,
+        int size
+    )
+    {
+        var paged = await enquiryRepo.GetAllEnquiryByAgentAsync(agentId, page, size);
         var dtos = mapper.Map<IEnumerable<EnquiryResponse>>(paged.Items);
 
         return ApiResponse<PagedResult<EnquiryResponse>>.Ok(

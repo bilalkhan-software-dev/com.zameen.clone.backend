@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using com.zameen.Models.Enums;
 
 namespace com.zameen.Models.Dto.Request;
@@ -17,6 +13,9 @@ public class PropertyFilterParams
     public decimal? MaxPrice { get; set; }
     public int? MinBedrooms { get; set; }
     public int? MaxBedrooms { get; set; }
+
+    public int? MinBathrooms { get; set; }
+    public int? MaxBathrooms { get; set; }
     public decimal? MinAreaSize { get; set; }
     public decimal? MaxAreaSize { get; set; }
     public string? SearchTerm { get; set; } // title or description

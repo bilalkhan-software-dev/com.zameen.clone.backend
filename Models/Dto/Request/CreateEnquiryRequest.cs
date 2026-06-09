@@ -7,4 +7,8 @@ public class CreateEnquiryRequest
     public string SenderEmail { get; set; } = string.Empty;
     public string? Phone { get; set; }
     public string Message { get; set; } = string.Empty;
+    public string? Cnic { get; set; }
+    public string? City { get; set; }
+    public string? MonthlySalary { get; set; }
+    public string EnquiryType { get; set; } = "General";
 }

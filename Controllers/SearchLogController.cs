@@ -16,4 +16,15 @@ public class SearchLogController(ITrendingService trendingService) : ControllerB
         await trendingService.LogSearchAsync(request);
         return Ok();
     }
+
+    [HttpGet("trending/locations/by-city")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetTrendingLocationsByCity(
+        [FromQuery] string city,
+        [FromQuery] int days = 30
+    )
+    {
+        var result = await trendingService.GetTrendingLocationsByCityAsync(city, days);
+        return Ok(result);
+    }
 }

@@ -12,9 +12,14 @@ public interface IEnquiryService
         int page,
         int size
     );
+    Task<ApiResponse<PagedResult<EnquiryResponse>>> GetEnquiriesByAgentAsync(
+        string agent,
+        int page,
+        int size
+    );
     Task<ApiResponse> DeleteEnquiryAsync(int id, string adminUserId);
 
-     Task<ApiResponse<PagedResult<EnquiryResponse>>> GetAllEnquiries(
+    Task<ApiResponse<PagedResult<EnquiryResponse>>> GetAllEnquiries(
         int page,
         int size,
         string sortBy,

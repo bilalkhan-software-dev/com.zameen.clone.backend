@@ -16,6 +16,8 @@ public interface IPropertyRepository : IGenericRepository<Property, int>
     );
     Task<Property?> GetPropertyDetailById(int propertyId);
     Task<bool> ExistsByTitleAsync(string title, int? excludeId = null);
+    Task<PagedResult<Property>> GetSimilarByLocationAsync(int propertyId, int page, int pageSize);
+    Task<PagedResult<Property>> GetSimilarByAgentAsync(int propertyId, int page, int pageSize);
 
     IQueryable<Property> GetQueryable();
 }

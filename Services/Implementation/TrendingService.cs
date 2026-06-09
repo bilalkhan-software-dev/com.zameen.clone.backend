@@ -13,6 +13,7 @@ namespace com.zameen.Services.Implementation;
 public class TrendingService(
     ISearchLogRepository _searchLogRepo,
     IPropertyRepository _propertyRepo,
+    ILogger<TrendingService> _logger,
     IMapper _mapper,
     IMemoryCache _cache
 ) : ITrendingService
@@ -96,5 +97,22 @@ public class TrendingService(
         _cache.Set("trending_locations", result, TimeSpan.FromHours(2));
 
         return ApiResponse<List<TrendingLocationDto>>.Ok(result);
+    }
+
+    public async Task<ApiResponse<List<TrendingLocationData>>> GetTrendingLocationsByCityAsync(
+        string city,
+        int days
+    )
+    {
+        var toDate = DateTime.UtcNow.Date;
+        var fromDate = toDate.AddDays(-days);
+        _logger.LogInformation(
+            "Trending params: City={City}, From={From}, To={To}",
+            city,
+            fromDate,
+            toDate
+        );
+        var data = await _searchLogRepo.GetTrendingLocationsByCityAsync(city, fromDate, toDate);
+        return ApiResponse<List<TrendingLocationData>>.Ok(data);
     }
 }

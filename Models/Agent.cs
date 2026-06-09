@@ -14,6 +14,7 @@ public class Agent : AbstractEntity
 
     public string AgencyName { get; set; } = string.Empty;
     public string ContactNumber { get; set; } = string.Empty;
+    public string? ContactEmail { get; set; } = string.Empty;
 
     public string? Bio { get; set; }
 }
